@@ -4,5 +4,5 @@ To run this demo:
 2) run OpenOffice.org in server mode listening on port 8100:
 soffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
 3) run demo:
-perl loaddoc.pl
+perl loaddoc.pl test1.sxw
 

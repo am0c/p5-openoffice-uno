@@ -46,8 +46,13 @@ require "Perluno.pm";
 
 $pu = new Perluno();
 
+if ( $#ARGV != 0 ) {
+	print "Usage: loaddoc.pl <filename>\n";
+	exit(-1);
+}
 use Cwd;
 my $dir = getcwd;
+$fname = $ARGV[0];
 $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
 $sm = $cu->getServiceManager();
 
@@ -61,5 +66,5 @@ $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
 # create a calc document
 @args = ();
-$sdoc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
+$sdoc = $dt->loadComponentFromURL("file://" . $dir . "/" . $fname, "_blank", 0, \@args);
 
