@@ -50,8 +50,10 @@ if ( $#ARGV != 1 ) {
 	print "Usage: savedoc.pl <original file> <target file>\n";
 	exit(-1);
 }
+
 $fname1 = $ARGV[0];
 $fname2 = $ARGV[1];
+
 use Cwd;
 my $dir = getcwd;
 $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
@@ -86,4 +88,4 @@ $pv2->Value("swriter: StarOffice XML (Writer)");
 
 $sdoc->storeAsURL("file://" . $dir . "/" . $fname2, \@args2 );
 
-return(0);
+exit(0);
