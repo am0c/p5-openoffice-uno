@@ -1,7 +1,6 @@
 BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Perluno;
-use Devel::Peek;
 
 $pu = new Perluno();
 
@@ -18,7 +17,6 @@ $rc = $smgr->getPropertyValue("DefaultContext");
 
 $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-# create a calc document
 $pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
 
 $pv->Name("Hidden");
@@ -26,6 +24,7 @@ $pv->Value(1);
 
 @args = ( $pv );
 
+# open an existing word doc, with PropertyValues
 $sdoc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
 
 $loaded = 1;

@@ -1,7 +1,6 @@
 BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Perluno;
-use Devel::Peek;
 
 $pu = new Perluno();
 
@@ -18,7 +17,7 @@ $rc = $smgr->getPropertyValue("DefaultContext");
 
 $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-# open an existing doc
+# open an existing writer doc
 @args = ();
 $doc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
 

@@ -1,7 +1,6 @@
 BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Perluno;
-use Devel::Peek;
 
 $pu = new Perluno();
 
@@ -18,7 +17,6 @@ $rc = $smgr->getPropertyValue("DefaultContext");
 
 $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-# create a calc document
 $pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
 
 $pv->Name("Hidden");
