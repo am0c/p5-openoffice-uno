@@ -192,6 +192,16 @@ private:
     Perluno_Interface *ctx;
 };
 
+class Perluno_Boolean : Perluno_Any {
+public:
+    Perluno_Boolean();
+    Perluno_Boolean(SV *val);
+    ~Perluno_Boolean();
+
+private:
+    sal_Bool bvalue;
+};
+
 // Function Prototype
 Perluno_SAny AVToSAny(AV *av);
 Perluno_XAny HVToStruct(HV *hv);

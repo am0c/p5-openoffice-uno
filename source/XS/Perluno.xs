@@ -266,6 +266,7 @@ Perluno_Interface::Perluno_Interface(Perluno_XAny thisif) {
 SV *
 Perluno_Interface::invoke(char *method, Perluno_SAny args) {
     I32 i;
+
     ::rtl::OUString mstr = ::rtl::OUString::createFromAscii(method);
     if ( ! xinvoke.is() ) {
 	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
@@ -426,6 +427,12 @@ SVToAny(SV *svp) {
 				break;
 			    }
 
+			    case typelib_TypeClass_BOOLEAN: {
+				a = tany;
+				break;
+			    }
+
+
 			    default: {
 				fprintf(stderr, "Unsupported ref: %d\n", tany.getValueTypeClass());
 				break;
@@ -454,6 +461,11 @@ SVToAny(SV *svp) {
 
 			    case typelib_TypeClass_INTERFACE: {
 				a <<= tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_BOOLEAN: {
+				a = tany;
 				break;
 			    }
 
@@ -653,7 +665,6 @@ AnyToSV(Perluno_XAny a) {
 	}
 
 	case typelib_TypeClass_STRUCT: {
-	    fprintf(stderr, "Any2SV: STRUCT type\n");
 	    Perluno_Struct *tret = new Perluno_Struct(a);
 	    SV *mret = sv_newmortal();
 	    ret = newRV_inc(mret);
@@ -683,6 +694,21 @@ AnyToSV(Perluno_XAny a) {
 	}
     }
     return ret;
+}
+
+Perluno_Boolean::Perluno_Boolean() {
+    sal_Bool b = sal_False;
+    pany = Perluno_XAny(&b, getBooleanCppuType());
+    bvalue = sal_False;
+}
+
+Perluno_Boolean::Perluno_Boolean(SV *bval) {
+    sal_Bool b = (sal_Bool)SvTRUE(bval);
+    pany = Perluno_XAny(&b, getBooleanCppuType());
+    bvalue = b;
+}
+
+Perluno_Boolean::~Perluno_Boolean() {
 }
 
 MODULE = Perluno     	PACKAGE = Perluno	PREFIX = Perluno_
@@ -824,6 +850,21 @@ CODE:
     }
 
     RETVAL = ret;
+}
+OUTPUT:
+    RETVAL
+
+MODULE = Perluno	PACKAGE = Perluno::Boolean	PREFIX = Perluno_
+
+Perluno_Boolean *
+Perluno_Boolean::new(...)
+CODE:
+{
+    if ( items == 2 ) {
+        RETVAL = new Perluno_Boolean(ST(1));
+    } else {
+        RETVAL = new Perluno_Boolean();
+    }
 }
 OUTPUT:
     RETVAL
