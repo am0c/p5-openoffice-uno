@@ -1,0 +1,8 @@
+mkdir: %_DEST%\lib%_EXT%\perl
+mkdir: %_DEST%\lib%_EXT%\perl\Perluno
+mkdir: %_DEST%\lib%_EXT%\perl\auto
+mkdir: %_DEST%\lib%_EXT%\perl\auto\Perluno
+
+..\%__SRC%\misc\build\perluno\source\XS\blib\arch\auto\Perluno\Perluno.so %_DEST%\lib%_EXT%\perl\auto\Perluno\Perluno.so
+..\%__SRC%\misc\build\perluno\source\XS\Perluno.pm %_DEST%\lib%_EXT%\perl\Perluno.pm
+..\%__SRC%\misc\build\perluno\source\XS\lib\Perluno\Interface.pm %_DEST%\lib%_EXT%\perl\Perluno\Interface.pm

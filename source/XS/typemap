@@ -1,0 +1,38 @@
+Perluno *			T_PERLUNOREF
+Perluno_Interface *		T_INTERFREF
+Perluno_Any *			T_ANYREF
+
+#############################################################################
+INPUT
+T_PERLUNOREF
+    if (SvROK($arg)) {
+	IV tmp = SvIV((SV*)SvRV($arg));
+	$var = INT2PTR($type,tmp);
+    } else
+	Perl_croak(aTHX_ \"$var is not a reference\")
+
+T_INTERFREF
+    if (SvROK($arg)) {
+	IV tmp = SvIV((SV*)SvRV($arg));
+	$var = INT2PTR($type,tmp);
+    } else
+	Perl_croak(aTHX_ \"$var is not a reference\")
+
+T_ANYREF
+    if (SvROK($arg)) {
+	IV tmp = SvIV((SV*)SvRV($arg));
+	$var = INT2PTR($type,tmp);
+    } else
+	Perl_croak(aTHX_ \"$var is not a reference\")
+
+#############################################################################
+OUTPUT
+T_PERLUNOREF
+    sv_setref_pv($arg, \"Perluno\", (void*)$var);
+
+T_INTERFREF
+    sv_setref_pv($arg, \"Perluno::Interface\", (void*)$var);
+
+T_ANYREF
+    sv_setref_pv($arg, \"Perluno::Any\", (void*)$var);
+

@@ -1,0 +1,8 @@
+To run this demo:
+
+1) make sure perluno file contains the correct locations for the corresponding "*.rdb" files.
+2) run OpenOffice.org in server mode listening on port 8100:
+soffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+3) run demo:
+perl loaddoc.pl
+
