@@ -1,5 +1,6 @@
 Perluno *			T_PERLUNOREF
 Perluno_Interface *		T_INTERFREF
+Perluno_Struct *		T_STRUCTREF
 Perluno_Any *			T_ANYREF
 
 #############################################################################
@@ -25,6 +26,13 @@ T_ANYREF
     } else
 	Perl_croak(aTHX_ \"$var is not a reference\")
 
+T_STRUCTREF
+    if (SvROK($arg)) {
+	IV tmp = SvIV((SV*)SvRV($arg));
+	$var = INT2PTR($type,tmp);
+    } else
+	Perl_croak(aTHX_ \"$var is not a reference\")
+
 #############################################################################
 OUTPUT
 T_PERLUNOREF
@@ -35,4 +43,7 @@ T_INTERFREF
 
 T_ANYREF
     sv_setref_pv($arg, \"Perluno::Any\", (void*)$var);
+
+T_STRUCTREF
+    sv_setref_pv($arg, \"Perluno::Struct\", (void*)$var);
 
