@@ -98,6 +98,11 @@ all: \
 	$(MISC)$/remove_build.flag \
 	ALLTAR
 
+maketar::
+	rm -f download/perluno-0.01.tar.gz
+	(cd ..;tar cvf perluno/download/perluno-0.01.tar -T perluno/flist.lst;cd perluno)
+	gzip download/perluno-0.01.tar
+
 .INCLUDE : set_ext.mk
 .INCLUDE :	target.mk
 .INCLUDE :	tg_ext.mk
