@@ -90,6 +90,113 @@ Perluno::createServices() {
 	throw ::com::sun::star::uno::RuntimeException(
 	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "Perluno: couldn't instantiate typeconverter service" )),
 		Perluno_XInterface () );
+
+    PerlunoInstance.reflection = Perluno_XIdlReflection (
+        PerlunoInstance.localCtx->getServiceManager()->createInstanceWithContext(
+	    PERLUNO_COREREFLECTION_OBJECT, PerlunoInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
+
+    if( ! PerlunoInstance.reflection.is() )
+	throw ::com::sun::star::uno::RuntimeException(
+	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "Perluno: couldn't instantiate reflection service" )),
+		Perluno_XInterface () );
+}
+
+Perluno_Struct::Perluno_Struct() {
+}
+
+Perluno_Struct::Perluno_Struct(char *sname) {
+    ::rtl::OUString soname = ::rtl::OUString::createFromAscii(sname);
+
+    Perluno_SAny args(1);
+    Perluno_XInterface tif;
+    Perluno_XAny tstruct;
+    Perluno_XIdlClass idlclass(PerlunoInstance.reflection->forName(soname), ::com::sun::star::uno::UNO_QUERY);
+    if (! idlclass.is()) {
+	fprintf(stderr, "Perluno: failed to create IdlClass\n");
+	return;
+    }
+
+    idlclass->createObject(tstruct);
+
+    args[0] <<= tstruct;
+    tif = PerlunoInstance.ssf->createInstanceWithArguments(args);
+    if ( ! tif.is() ) {
+	fprintf(stderr, "Perluno: Proxy creation failed\n");
+        return;
+    }
+
+    xinvoke = Perluno_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
+
+    if ( ! xinvoke.is() ) {
+	fprintf(stderr, "Perluno: XInvocation2 failed to be created\n");
+        return;
+    }
+
+    pany = tstruct;
+    TypeString = strdup(sname);
+}
+
+Perluno_Struct::Perluno_Struct(Perluno_XAny tany) {
+    Perluno_SAny args(1);
+    Perluno_XInterface tif;
+
+    args[0] <<= tany;
+    tif = PerlunoInstance.ssf->createInstanceWithArguments(args);
+    if ( ! tif.is() ) {
+	fprintf(stderr, "Perluno: Proxy creation failed\n");
+        return;
+    }
+
+    xinvoke = Perluno_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
+
+    if ( ! xinvoke.is() ) {
+	fprintf(stderr, "Perluno: XInvocation2 failed to be created\n");
+        return;
+    }
+
+    pany = tany;
+}
+
+Perluno_Struct::~Perluno_Struct() {
+}
+
+void
+Perluno_Struct::set(char *mname, SV *value) {
+    Perluno_XAny aval;
+
+    if ( ! xinvoke.is() ) {
+	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
+	return;
+    }
+
+    aval = SVToAny(value);
+
+    ::rtl::OUString membername = ::rtl::OUString::createFromAscii(mname);
+    if ( xinvoke->hasProperty(membername) ) {
+	xinvoke->setValue( membername, aval );
+    } else {
+	fprintf(stderr, "Member name: \"%s\" does not exists\n", mname);
+	return;
+    }
+}
+
+SV *
+Perluno_Struct::get(char *mname) {
+    Perluno_XAny aval;
+
+    if ( ! xinvoke.is() ) {
+	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
+	return (SV *)Nullsv;
+    }
+
+    ::rtl::OUString membername = ::rtl::OUString::createFromAscii(mname);
+    if ( xinvoke->hasProperty(membername) ) {
+	aval = xinvoke->getValue( membername );
+    } else {
+	fprintf(stderr, "Member name: \"%s\" does not exists\n", mname);
+	return (SV *)Nullsv;
+    }
+    return AnyToSV(aval);
 }
 
 Perluno_Interface *
@@ -117,6 +224,11 @@ Perluno::createInitialComponentContext() {
 
     ctx = new Perluno_Interface(tany);
     return ctx;
+}
+
+Perluno_Struct *
+Perluno::createIdlStruct(char *name) {
+    return new Perluno_Struct(name);
 }
 
 Perluno_Interface::Perluno_Interface() {
@@ -149,7 +261,6 @@ Perluno_Interface::Perluno_Interface(Perluno_XAny thisif) {
     }
 
     pany = thisif;
-    setObjType(PERLUNO_OBJECT_INTERFACE_TYPE);
 }
 
 SV *
@@ -202,17 +313,6 @@ Perluno_Any::getAny() {
 	return pany;
 }
 
-long
-Perluno_Any::getObjType() {
-    return ObjType;
-}
-
-
-void
-Perluno_Any::setObjType(long otype) {
-    ObjType = otype;
-}
-
 static void
 PerlunoExit(pTHX_ void *pi) {
 }
@@ -240,6 +340,38 @@ AVToSAny(AV *parr) {
 }
 
 Perluno_XAny
+HVToStruct(HV *hv) {
+    Perluno_XAny a;
+
+    SV *smagic = newSVpv(PERLUNO_STRUCT_NAME_KEY, strlen(PERLUNO_STRUCT_NAME_KEY));
+    if ( hv_exists_ent(hv, smagic, 0) ) {
+	char *key;
+	I32 klen;
+	SV *val;
+
+	SV **pname = hv_fetch(hv, PERLUNO_STRUCT_NAME_KEY, strlen(PERLUNO_STRUCT_NAME_KEY), FALSE);
+	char *cname = SvPVX(*pname);
+
+	::rtl::OUString sname = ::rtl::OUString::createFromAscii(cname);
+
+	Perluno_XMaterialHolder mholder( PerlunoInstance.ssf, ::com::sun::star::uno::UNO_QUERY );
+	if ( mholder.is( ) )
+		a = mholder->getMaterial();
+
+	// Iterate through hash
+	hv_iterinit(hv);
+	while (val = hv_iternextsv(hv, (char **) &key, &klen)) {
+	    if ( strcmp(key, PERLUNO_STRUCT_NAME_KEY) ) {
+		Perluno_XAny tany;
+
+		tany = SVToAny(val);
+	    }
+	}
+    }
+    return a;
+}
+
+Perluno_XAny
 SVToAny(SV *svp) {
     Perluno_XAny a;
 
@@ -248,13 +380,16 @@ SVToAny(SV *svp) {
 	    break;
 
 	case SVt_IV: {
-	    long intval = (long) SvIVX(svp);
-	    a <<= intval;
+	    if ( SvIOK(svp) ) {
+		a <<= (long) SvIVX(svp);
+	    }
 	    break;
 	}
 
 	case SVt_NV:
-	    (long) SvNVX(svp);
+	    if ( SvNOK(svp) ) {
+		a <<= SvNVX(svp);
+	    }
 	    break;
 
 	case SVt_RV: {
@@ -272,7 +407,31 @@ SVToAny(SV *svp) {
 			long otype;
 			IV tmp = SvIV((SV*)SvRV(svp));
 			Perluno_Any *tptr = INT2PTR(Perluno_Any *,tmp);
-			a <<= tptr->getAny();
+
+			Perluno_XAny tany = tptr->getAny();
+
+			switch (tany.getValueTypeClass()) {
+			    case typelib_TypeClass_STRUCT: {
+				Perluno_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
+				if( mh.is() ) {
+				    a = mh->getMaterial();
+				} else {
+				    fprintf(stderr, "Error getting Material\n");
+				}
+				break;
+			    }
+
+			    case typelib_TypeClass_INTERFACE: {
+				a <<= tany;
+				break;
+			    }
+
+			    default: {
+				fprintf(stderr, "Unsupported ref: %d\n", tany.getValueTypeClass());
+				break;
+			    }
+			}
+
 			break;
 		    }
 
@@ -280,12 +439,42 @@ SVToAny(SV *svp) {
 			long otype;
 			IV tmp = SvIV((SV*)SvRV(svp));
 			Perluno_Any *tptr = INT2PTR(Perluno_Any *,tmp);
-			a <<= tptr->getAny();
+			Perluno_XAny tany = tptr->getAny();
+			switch (tany.getValueTypeClass()) {
+			    case typelib_TypeClass_STRUCT: {
+				Perluno_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
+				if( mh.is() ) {
+				    a = mh->getMaterial();
+				} else {
+				    fprintf(stderr, "Error getting Material\n");
+				}
+//				a <<= tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_INTERFACE: {
+				a <<= tany;
+				break;
+			    }
+
+			    default: {
+				fprintf(stderr, "Unsupported mg ref: %d\n", tany.getValueTypeClass());
+				break;
+			    }
+			}
+			break;
+		    }
+
+		    case SVt_PVHV: {
+			HV *hv = (HV *)SvRV(svp);
+			Perluno_XAny aany = HVToStruct(hv);
+			a <<= aany;
+
 			break;
 		    }
 
 		    default:
-			fprintf(stderr, "SVToAny: Unsupported reference type\n");
+			fprintf(stderr, "SVToAny: Unsupported reference type: %d\n", SvTYPE(SvRV(svp)));
 			break;
 		}
 	    }
@@ -457,10 +646,18 @@ AnyToSV(Perluno_XAny a) {
 	    break;
 	}
 
-	case typelib_TypeClass_EXCEPTION:
-	case typelib_TypeClass_STRUCT: {
-	    fprintf(stderr, "Any2SV: EXCEPTION or STRUCT type not supported yet\n");
+	case typelib_TypeClass_EXCEPTION: {
+	    fprintf(stderr, "Any2SV: EXCEPTION type not supported yet\n");
 	    ret = Nullsv;
+	    break;
+	}
+
+	case typelib_TypeClass_STRUCT: {
+	    fprintf(stderr, "Any2SV: STRUCT type\n");
+	    Perluno_Struct *tret = new Perluno_Struct(a);
+	    SV *mret = sv_newmortal();
+	    ret = newRV_inc(mret);
+	    sv_setref_pv(ret, "Perluno::Struct", (void *)tret);
 	    break;
 	}
 
@@ -521,6 +718,20 @@ CODE:
 OUTPUT:
     RETVAL
 
+Perluno_Struct *
+Perluno::createIdlStruct(...)
+CODE:
+{
+    char *name;
+    STRLEN len;
+
+    name = SvPV(ST(1), len);
+    Perluno_Struct *tret = THIS->createIdlStruct(name);
+    RETVAL = tret;
+}
+OUTPUT:
+    RETVAL
+
 MODULE = Perluno	PACKAGE = Perluno::Interface	PREFIX = Perluno_
 
 Perluno_Interface *
@@ -564,3 +775,56 @@ CODE:
 {
     delete(THIS);
 }
+
+MODULE = Perluno	PACKAGE = Perluno::Struct	PREFIX = Perluno_
+
+Perluno_Struct *
+Perluno_Struct::new(...)
+CODE:
+{
+    Perluno_Struct *ret;
+
+    ret = (Perluno_Struct *)NULL;
+    if ( items == 2 ) {
+	char *stype;
+	STRLEN len;
+
+	stype = SvPV(ST(1), len);
+	ret = new Perluno_Struct(stype);
+    }
+    RETVAL = ret;
+}
+OUTPUT:
+    RETVAL
+
+void
+Perluno_Struct::DESTROY(...)
+CODE:
+{
+    delete(THIS);
+}
+
+SV *
+Perluno_Struct::AUTOLOAD(...)
+CODE:
+{
+    CV *member = get_cv("Perluno::Struct::AUTOLOAD", 0);
+    char *mname;
+
+    mname = SvPVX(member);
+
+    SV *ret;
+
+    ret = Nullsv;
+    // Distinguish between "set" and "get" accessor
+    if ( items == 2 ) {	// If "set"
+	THIS->set(mname, ST(1));
+    } else {	// If "get"
+	RETVAL = THIS->get(mname);
+    }
+
+    RETVAL = ret;
+}
+OUTPUT:
+    RETVAL
+

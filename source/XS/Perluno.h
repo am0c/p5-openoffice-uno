@@ -73,8 +73,10 @@
 #include <com/sun/star/lang/XSingleServiceFactory.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/reflection/XIdlReflection.hpp>
+#include <com/sun/star/beans/XMaterialHolder.hpp>
 #include <com/sun/star/script/XTypeConverter.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
+#include <com/sun/star/reflection/XIdlClass.hpp>
 #include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/beans/XIntrospection.hpp>
 #include <com/sun/star/script/XInvocation2.hpp>
@@ -82,6 +84,7 @@
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/uno/XInterface.hpp>
 #include <com/sun/star/uno/Reference.h>
+#include <typelib/typedescription.hxx>
 #include <cppuhelper/bootstrap.hxx>
 
 #include <com/sun/star/uno/Any.hxx>
@@ -103,6 +106,9 @@ extern "C" {
 
 #define PERLUNO_INVOCATION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Invocation" ))
 #define PERLUNO_TYPECONVERTER_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Converter" ))
+#define PERLUNO_COREREFLECTION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.reflection.CoreReflection" ))
+
+#define PERLUNO_STRUCT_NAME_KEY "PerlunoStructName"
 
 typedef ::com::sun::star::uno::Reference< ::com::sun::star::uno::XComponentContext > Perluno_XComponentContext;	
 typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XMultiComponentFactory > Perluno_XMultiComponentFactory;
@@ -117,14 +123,17 @@ typedef ::com::sun::star::uno::Sequence< short > Perluno_SShort;
 typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XServiceInfo > Perluno_XServiceInfo;
 typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XTypeProvider > Perluno_XTypeProvider;
 typedef ::com::sun::star::uno::Reference< ::com::sun::star::script::XInvocation2 > Perluno_XInvocation2;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::beans::XMaterialHolder > Perluno_XMaterialHolder;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlClass > Perluno_XIdlClass;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlReflection > Perluno_XIdlReflection;
 
-#define PERLUNO_OBJECT_INTERFACE_TYPE 1
 
 typedef struct _PerlRT {
 	bool prtInitialized;
 	Perluno_XComponentContext localCtx;
 	Perluno_XSingleServiceFactory ssf;
 	Perluno_XTypeConverter typecvt;
+	Perluno_XIdlReflection reflection;
 } PerlRT;
 
 class Perluno_Any {
@@ -132,14 +141,25 @@ public:
 	Perluno_Any() {};
 	~Perluno_Any() {};
 	Perluno_XAny getAny();
-	long getObjType();
-	void setObjType(long otype);
+
+	Perluno_XInvocation2 xinvoke;
 
 protected:
 	Perluno_XAny pany;
+};
+
+class Perluno_Struct : Perluno_Any {
+public:
+	Perluno_Struct();
+	Perluno_Struct(char *stype);
+	Perluno_Struct(Perluno_XAny tinterface);
+	~Perluno_Struct();
+
+	void set(char *mname, SV *value);
+	SV *get(char *mname);
 
 private:
-	long ObjType;
+	char *TypeString;
 };
 
 class Perluno_Interface : Perluno_Any {
@@ -149,9 +169,6 @@ public:
 	~Perluno_Interface() {};
 
 	SV * invoke(char *method, Perluno_SAny args);
-
-private:
-	Perluno_XInvocation2 xinvoke;
 };
 
 class Perluno_Util {
@@ -167,6 +184,7 @@ public:
 
     Perluno_Interface *createInitialComponentContext();
     Perluno_Interface *createInitialComponentContext(char *iniFile);
+    Perluno_Struct *createIdlStruct(char *name);
 
 private:
     void createServices();
@@ -176,6 +194,7 @@ private:
 
 // Function Prototype
 Perluno_SAny AVToSAny(AV *av);
+Perluno_XAny HVToStruct(HV *hv);
 Perluno_XAny SVToAny(SV *svp);
 SV *AnyToSV(Perluno_XAny a);
 AV *SAnyToAV(Perluno_SAny sa);
