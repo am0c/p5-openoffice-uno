@@ -20,7 +20,7 @@ $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
 # open an existing doc
 @args = ();
-$doc = $dt->loadComponentFromURL("file:///home/bustamam/oo1.0.3/perluno/source/XS/test1.sxw", "_blank", 0, \@args);
+$doc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
 
 $loaded = 1;
 
