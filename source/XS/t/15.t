@@ -17,20 +17,21 @@ $rc = $smgr->getPropertyValue("DefaultContext");
 
 $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-$pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
+@args = ();
 
-$pv->Name("Hidden");
-$pv->Value(1);
+$sdoc = $dt->loadComponentFromURL("private:factory/swriter", "_blank", 0, \@args);
 
-@args = ( $pv );
+$oText = $sdoc->getText();
 
-# open an existing word doc, with PropertyValues
-$sdoc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
+$oCursor = $oText->createTextCursor();
 
-# Close doc
+$oCursor->setPropertyValue("CharColor", 255);
+$oCursor->setPropertyValue("CharShadowed", new Perluno::Boolean(TRUE));
+
+$oText->insertString($oCursor, " This is a colored Text - blue with shadow\n", new Perluno::Boolean(FALSE));
+
 $sdoc->dispose();
 
 $loaded = 1;
 
 print "ok 1\n";
-

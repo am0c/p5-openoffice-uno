@@ -21,6 +21,9 @@ $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 @args = ();
 $doc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
 
+# Close doc
+$doc->dispose();
+
 $loaded = 1;
 
 print "ok 1\n";

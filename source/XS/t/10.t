@@ -21,6 +21,9 @@ $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 @args = ();
 $sdoc = $dt->loadComponentFromURL("private:factory/swriter", "_blank", 0, \@args);
 
+# Close doc
+$sdoc->dispose();
+
 $loaded = 1;
 
 print "ok 1\n";

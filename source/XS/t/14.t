@@ -38,6 +38,9 @@ $pv2->Value("swriter: StarOffice XML (Writer)");
 
 $sdoc->storeAsURL("file://" . $dir . "/test2.sxw", \@args2 );
 
+# Close doc
+$sdoc->dispose();
+
 $loaded = 1;
 
 print "ok 1\n";
