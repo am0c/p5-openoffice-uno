@@ -65,11 +65,12 @@ WriteMakefile (
     'NAME'	=> 'Perluno',
     'CC'	=> 'g++',
     'LD'	=> 'g++',
-    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -fPIC ', 
+    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -fPIC -DGXX_INCLUDE_PATH=' . $ENV{'GXX_INCLUDE_PATH'} . " ", 
     'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' -shared -Wl,-Bdynamic ',
-    'LIBS'	=> [ $ENV{'SOLARLIB'} . ' -lstdc++ -lcppuhelpergcc3 -lcppu -lsalhelpergcc3 -lsal -lstlport_gcc -lgcc_s '],
+    'LIBS'	=> [ $ENV{'SOLARLIB'} . ' -lstdc++ -luno_cppuhelpergcc3 -luno_cppu -luno_salhelpergcc3 -luno_sal -lstlport_gcc -lgcc_s '],
     'INC'	=> $ENV{'SOLARINC'},
-    'AUTHOR'	=> 'Bustamam Harun <bustamam98@yahoo.com>',
+    'XSOPT'	=> '-C++',
+    'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
     'VERSION'	=> '0.01'
 );
 

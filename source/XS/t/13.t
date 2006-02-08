@@ -6,18 +6,18 @@ $pu = new Perluno();
 
 use Cwd;
 my $dir = getcwd;
-$cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
-$sm = $cu->getServiceManager();
+my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $sm = $cu->getServiceManager();
 
-$resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
+my $resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
 
-$smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+my $smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
 
-$rc = $smgr->getPropertyValue("DefaultContext");
+my $rc = $smgr->getPropertyValue("DefaultContext");
 
-$dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
+my $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-$pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
+my $pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
 
 $pv->Name("Hidden");
 $pv->Value(1);
@@ -25,7 +25,7 @@ $pv->Value(1);
 @args = ( $pv );
 
 # open an existing word doc, with PropertyValues
-$sdoc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
+my $sdoc = $dt->loadComponentFromURL("file://" . $dir . "/test1.sxw", "_blank", 0, \@args);
 
 # Close doc
 $sdoc->dispose();

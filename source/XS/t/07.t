@@ -2,17 +2,17 @@ BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Perluno;
 
-$pu = new Perluno();
+my $pu = new Perluno();
 
 use Cwd;
 my $dir = getcwd;
-$cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
 
-$sm = $cu->getServiceManager();
+my $sm = $cu->getServiceManager();
 
-$resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
+my $resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
 
-$smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+my $smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
 
 #$rc = $smgr->getPropertyValue("DefaultContext");
 

@@ -65,6 +65,7 @@
 static PerlRT PerlunoInstance;
 
 Perluno::Perluno() {
+    ctx = NULL;
 }
 
 Perluno::~Perluno() {
@@ -316,6 +317,11 @@ Perluno_Any::getAny() {
 
 static void
 PerlunoExit(pTHX_ void *pi) {
+    // Clean up PerlRT
+    ((PerlRT *)pi)->reflection.clear();
+    ((PerlRT *)pi)->typecvt.clear();
+    ((PerlRT *)pi)->ssf.clear();
+    ((PerlRT *)pi)->localCtx.clear();
 }
 
 void
@@ -726,6 +732,13 @@ CODE:
 }
 OUTPUT:
     RETVAL
+
+void
+Perluno::DESTROY(...)
+CODE:
+{
+    delete(THIS);
+}
 
 Perluno_Interface *
 Perluno::createInitialComponentContext(...)

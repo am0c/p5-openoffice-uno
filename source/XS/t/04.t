@@ -6,9 +6,10 @@ $pu = new Perluno();
 
 use Cwd;
 my $dir = getcwd;
-$cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
 
-$sm = $cu->getServiceManager();
+print STDERR "04\n";
+my $sm = $cu->getServiceManager();
 
 $loaded = 1;
 

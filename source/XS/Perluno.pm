@@ -4,8 +4,8 @@ require DynaLoader;
 
 @ISA = qw(Exporter DynaLoader);
 
-bootstrap Perluno;
-
 @EXPORT = qw( createComponentContext );
+
+bootstrap Perluno;
 
 1;
