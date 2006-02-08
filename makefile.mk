@@ -71,7 +71,7 @@ TARGET=perluno
 
 # --- Files --------------------------------------------------------
 
-TARFILE_NAME=perluno-0.01
+TARFILE_NAME=perluno-0.02
 TARFILE_ROOTDIR=perluno
 
 .IF "$(GUI)"=="UNX"
@@ -99,9 +99,9 @@ all: \
 	ALLTAR
 
 maketar::
-	rm -f download/perluno-0.01.tar.gz
-	(cd ..;tar cvf perluno/download/perluno-0.01.tar -T perluno/flist.lst;cd perluno)
-	gzip download/perluno-0.01.tar
+	rm -f download/perluno-0.02.tar.gz
+	(cd ..;tar cvf perluno/download/perluno-0.02.tar -T perluno/flist.lst;cd perluno)
+	gzip download/perluno-0.02.tar
 
 .INCLUDE : set_ext.mk
 .INCLUDE :	target.mk

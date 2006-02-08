@@ -4,3 +4,5 @@ Revision history for Perl extension Perluno.
 	- original version; created by h2xs 1.22 with options
 		-A perluno
 
+0.02  Tue Jan 07 19:47:30 2006
+	- update for OOo2.0.1

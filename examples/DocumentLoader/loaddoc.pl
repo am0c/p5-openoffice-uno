@@ -66,5 +66,6 @@ $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
 # create a calc document
 @args = ();
-$sdoc = $dt->loadComponentFromURL("file://" . $dir . "/" . $fname, "_blank", 0, \@args);
+my $sdoc = $dt->loadComponentFromURL("file://" . $dir . "/" . $fname, "_blank", 0, \@args);
 
+exit(0);
