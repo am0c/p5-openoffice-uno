@@ -69,7 +69,7 @@ WriteMakefile (
     'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' -shared -Wl,-Bdynamic ',
     'LIBS'	=> [ $ENV{'SOLARLIB'} . ' -lstdc++ -lcppuhelpergcc3 -lcppu -lsalhelpergcc3 -lsal -lstlport_gcc -lgcc_s '],
     'INC'	=> $ENV{'SOLARINC'},
-    'AUTHOR'	=> 'Bustamam Harun <bustamam98@yahoo.com>',
+    'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
     'VERSION'	=> '0.01'
 );
 
