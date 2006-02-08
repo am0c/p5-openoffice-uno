@@ -13,7 +13,7 @@ my $resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolve
 
 my $smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
 
-$rc = $smgr->getPropertyValue("DefaultContext");
+my $rc = $smgr->getPropertyValue("DefaultContext");
 
 $loaded = 1;
 

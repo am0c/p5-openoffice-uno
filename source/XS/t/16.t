@@ -68,12 +68,12 @@ $loaded = 1;
 print "ok 1\n";
 
 sub insertTextIntoCell {
-    local($table) = $_[0];
+    local($tabl) = $_[0];
     local($cellName) = $_[1];
     local($text) = $_[2];
     local($color) = $_[3];
 
-    $tableText = $table->getCellByName( $cellName );
+    $tableText = $tabl->getCellByName( $cellName );
     $cursor = $tableText->createTextCursor();
     $cursor->setPropertyValue( "CharColor", $color );
     $tableText->setString( $text );
