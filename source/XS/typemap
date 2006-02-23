@@ -1,12 +1,12 @@
-Perluno *			T_PERLUNOREF
-Perluno_Interface *		T_INTERFREF
-Perluno_Struct *		T_STRUCTREF
-Perluno_Any *			T_ANYREF
-Perluno_Boolean *		T_BOOLREF
+UNO *			T_UNOREF
+UNO_Interface *		T_INTERFREF
+UNO_Struct *		T_STRUCTREF
+UNO_Any *			T_ANYREF
+UNO_Boolean *		T_BOOLREF
 
 #############################################################################
 INPUT
-T_PERLUNOREF
+T_UNOREF
     if (SvROK($arg)) {
 	IV tmp = SvIV((SV*)SvRV($arg));
 	$var = INT2PTR($type,tmp);
@@ -43,18 +43,18 @@ T_BOOLREF
 
 #############################################################################
 OUTPUT
-T_PERLUNOREF
-    sv_setref_pv($arg, \"Perluno\", (void*)$var);
+T_UNOREF
+    sv_setref_pv($arg, \"OpenOffice::UNO\", (void*)$var);
 
 T_INTERFREF
-    sv_setref_pv($arg, \"Perluno::Interface\", (void*)$var);
+    sv_setref_pv($arg, \"OpenOffice::UNO::Interface\", (void*)$var);
 
 T_ANYREF
-    sv_setref_pv($arg, \"Perluno::Any\", (void*)$var);
+    sv_setref_pv($arg, \"OpenOffice::UNO::Any\", (void*)$var);
 
 T_STRUCTREF
-    sv_setref_pv($arg, \"Perluno::Struct\", (void*)$var);
+    sv_setref_pv($arg, \"OpenOffice::UNO::Struct\", (void*)$var);
 
 T_BOOLREF
-    sv_setref_pv($arg, \"Perluno::Boolean\", (void*)$var);
+    sv_setref_pv($arg, \"OpenOffice::UNO::Boolean\", (void*)$var);
 

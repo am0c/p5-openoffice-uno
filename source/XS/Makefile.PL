@@ -60,19 +60,89 @@
 #***********************************************************************
 
 use ExtUtils::MakeMaker;
+use File::Find;
+use File::Basename;
+use Config;
+
+if ( $Config{'ccversion'} eq "Sun WorkShop" ) {
+    
+} elsif ( $Config{'gccversion'} ne "" ) {
+}
+
+@ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
+
+@LPath = split(" ", $ENV{'SOLARLIB'});
+
+for ($i=0; $i <= $#LPath; $i++) {
+    $LPath[$i] =~ s/-L//;
+}
+
+$LibsOK = 0;
+%FLib = ();
+%SLib = ();
+# Check all required libs
+for $lib (@ReqLibs) {
+    for $lpath (@LPath) { 
+	$flib = &getReqLib($lpath, $lib);
+	if ( $flib ne "" ) {
+	    $LibsOK = 1;
+	    last;
+	}
+    }
+
+    if ( $LibsOK == 0 ) {
+	print "Library: $lib could not be found\n";
+	exit(-1);
+    }
+}
+
+$LinkLibs = "";
+for $ky (keys(%SLib)) {
+    $LinkLibs .= "-l" . $SLib{$ky} . " ";
+}
 
 WriteMakefile (       
-    'NAME'	=> 'Perluno',
-    'CC'	=> 'g++',
-    'LD'	=> 'g++',
-    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -fPIC -DGXX_INCLUDE_PATH=' . $ENV{'GXX_INCLUDE_PATH'} . " ", 
-    'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' -shared -Wl,-Bdynamic ',
-    'LIBS'	=> [ $ENV{'SOLARLIB'} . ' -lstdc++ -luno_cppuhelpergcc3 -luno_cppu -luno_salhelpergcc3 -luno_sal -lstlport_gcc -lgcc_s '],
+    'NAME'	=> 'OpenOffice::UNO',
+    'CC'	=> $ENV{'CC'},
+    'LD'	=> $ENV{'CC'},
+    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -DGXX_INCLUDE_PATH=' . $ENV{'GXX_INCLUDE_PATH'} . " ", 
+    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' ' . $Config{'lddlflags'} . ' ',
+    'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' ' . $Config{'lddlflags'}  . ' ',
+    'LIBS'	=> [ $ENV{'SOLARLIB'} .  $LinkLibs ],
     'INC'	=> $ENV{'SOLARINC'},
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
     'VERSION'	=> '0.01'
 );
 
+exit(0);
+
 # Remove the Makefile dependency. Causes problems on a few systems.
 sub MY::makefile { '' }
+
+sub getReqLib {
+    $cdir = $_[0];
+    $clib = $_[1];
+
+    push(@dirs, $cdir);
+    find( { wanted => \&getlib }, @dirs, );
+    if ( defined($FLib{$clib}) ) {
+	return($FLib{$clib});
+    } else {
+	return("");
+    }
+}
+
+sub getlib {
+    if ( ($File::Find::name =~ m/${clib}/) ) {
+	($libname, $dpath) = fileparse($File::Find::name);
+	if ( ($libname =~ m/^lib/) && ($libname =~ m/\.so$/) ) {
+	    if ( ! defined($FLib{$clib}) ) {
+		$FLib{$clib} = $libname;
+		$SLib{$clib} = $libname;
+		$SLib{$clib} =~ s/^lib//;
+		$SLib{$clib} =~ s/\.so$//;
+	    }
+	}
+    }
+}

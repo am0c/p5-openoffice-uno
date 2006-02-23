@@ -3,9 +3,9 @@ use vars qw($loaded);
 
 BEGIN { $| = 1; print "1..1\n"; }
 END { print "not ok 1\n" unless $loaded; }
-use Perluno;
+use OpenOffice::UNO;
 
-my $pu = new Perluno();
+my $pu = new OpenOffice::UNO();
 
 use Cwd;
 my $dir = getcwd;

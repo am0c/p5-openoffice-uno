@@ -1,4 +1,4 @@
-package Perluno;
+package OpenOffice::UNO;
 require Exporter;
 require DynaLoader;
 
@@ -6,6 +6,6 @@ require DynaLoader;
 
 @EXPORT = qw( createComponentContext );
 
-bootstrap Perluno;
+bootstrap OpenOffice::UNO;
 
 1;

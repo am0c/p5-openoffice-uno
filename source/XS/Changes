@@ -1,8 +1,8 @@
-Revision history for Perl extension Perluno.
+Revision history for Perl extension UNO.
 
 0.01  Sat Aug 16 11:13:39 2003
 	- original version; created by h2xs 1.22 with options
-		-A perluno
+		-A UNO
 
 0.02  Tue Jan 07 19:47:30 2006
 	- update for OOo2.0.1

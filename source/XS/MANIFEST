@@ -1,12 +1,12 @@
 Changes
 Makefile.PL
 MANIFEST
-Perluno.pm
-Perluno.xs
-Perluno.h
+UNO.pm
+UNO.xs
+UNO.h
 ppport.h
 typemap
-lib/Perluno/Interface.pm
+lib/UNO/Interface.pm
 perluno
 test1.sxw
 README

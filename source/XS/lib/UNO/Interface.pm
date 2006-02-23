@@ -1,4 +1,4 @@
-package Perluno::Interface;
+package OpenOffice::UNO::Interface;
 require Exporter;
 require DynaLoader;
 
