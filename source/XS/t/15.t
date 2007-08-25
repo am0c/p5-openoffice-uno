@@ -25,10 +25,10 @@ my $oText = $sdoc->getText();
 
 my $oCursor = $oText->createTextCursor();
 
-$oCursor->setPropertyValue("CharColor", 255);
-$oCursor->setPropertyValue("CharShadowed", new Perluno::Boolean(TRUE));
+$oCursor->setPropertyValue("CharColor", new OpenOffice::UNO::Int32(255));
+$oCursor->setPropertyValue("CharShadowed", new OpenOffice::UNO::Boolean(TRUE));
 
-$oText->insertString($oCursor, " This is a colored Text - blue with shadow\n", new Perluno::Boolean(FALSE));
+$oText->insertString($oCursor, " This is a colored Text - blue with shadow\n", new OpenOffice::UNO::Boolean(FALSE));
 
 $sdoc->dispose();
 

@@ -32,13 +32,11 @@ $oText->insertTextContent($oCursor, $table, 0);
 
 my $rows = $table->getRows();
 
-$table->setPropertyValue("BackTransparent", new Perluno::Boolean(FALSE));
-$table->setPropertyValue("BackColor", 13421823 );
-
+$table->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(FALSE));
+$table->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(13421823) );
 $row = $rows->getByIndex(0);
-$row->setPropertyValue("BackTransparent", new Perluno::Boolean(0));
-$row->setPropertyValue("BackColor", 6710932 );
-
+$row->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(0));
+$row->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(6710932) );
 $textColor = 16777215;
 
 &insertTextIntoCell($table, "A1", "FirstColumn", $textColor);
@@ -75,6 +73,6 @@ sub insertTextIntoCell {
 
     $tableText = $tabl->getCellByName( $cellName );
     $cursor = $tableText->createTextCursor();
-    $cursor->setPropertyValue( "CharColor", $color );
+    $cursor->setPropertyValue( "CharColor", new OpenOffice::UNO::Int32($color) );
     $tableText->setString( $text );
 }
