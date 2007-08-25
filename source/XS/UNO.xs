@@ -438,6 +438,10 @@ SVToAny(SV *svp) {
 				break;
 			    }
 
+			    case typelib_TypeClass_LONG: {
+				a = tany;
+				break;
+			    }
 
 			    default: {
 				fprintf(stderr, "Unsupported ref: %d\n", tany.getValueTypeClass());
@@ -452,7 +456,9 @@ SVToAny(SV *svp) {
 			long otype;
 			IV tmp = SvIV((SV*)SvRV(svp));
 			UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
+
 			UNO_XAny tany = tptr->getAny();
+
 			switch (tany.getValueTypeClass()) {
 			    case typelib_TypeClass_STRUCT: {
 				UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
@@ -461,7 +467,6 @@ SVToAny(SV *svp) {
 				} else {
 				    fprintf(stderr, "Error getting Material\n");
 				}
-//				a <<= tany;
 				break;
 			    }
 
@@ -471,6 +476,11 @@ SVToAny(SV *svp) {
 			    }
 
 			    case typelib_TypeClass_BOOLEAN: {
+				a = tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_LONG: {
 				a = tany;
 				break;
 			    }
@@ -674,7 +684,7 @@ AnyToSV(UNO_XAny a) {
 	    UNO_Struct *tret = new UNO_Struct(a);
 	    SV *mret = sv_newmortal();
 	    ret = newRV_inc(mret);
-	    sv_setref_pv(ret, "UNO::Struct", (void *)tret);
+	    sv_setref_pv(ret, "OpenOffice::UNO::Struct", (void *)tret);
 	    break;
 	}
 
@@ -689,7 +699,7 @@ AnyToSV(UNO_XAny a) {
 	    UNO_Interface *tret = new UNO_Interface(a);
 	    SV *mret = sv_newmortal();
 	    ret = newRV_inc(mret);
-	    sv_setref_pv(ret, "UNO::Interface", (void *)tret);
+	    sv_setref_pv(ret, "OpenOffice::UNO::Interface", (void *)tret);
 	    break;
 	}
 
@@ -715,6 +725,21 @@ UNO_Boolean::UNO_Boolean(SV *bval) {
 }
 
 UNO_Boolean::~UNO_Boolean() {
+}
+
+UNO_Int32::UNO_Int32() {
+    sal_Int32 i = sal_False;
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = 0;
+}
+
+UNO_Int32::UNO_Int32(SV *ival) {
+    sal_Int32 i = (sal_Int32)SvIV(ival);
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = i;
+}
+
+UNO_Int32::~UNO_Int32() {
 }
 
 MODULE = OpenOffice::UNO     	PACKAGE = OpenOffice::UNO	PREFIX = UNO_
@@ -790,7 +815,7 @@ SV *
 UNO_Interface::AUTOLOAD(...)
 CODE:
 {
-    CV *method = get_cv("UNO::Interface::AUTOLOAD", 0);
+    CV *method = get_cv("OpenOffice::UNO::Interface::AUTOLOAD", 0);
 
     I32 i;
     UNO_SAny args;
@@ -847,7 +872,7 @@ SV *
 UNO_Struct::AUTOLOAD(...)
 CODE:
 {
-    CV *member = get_cv("UNO::Struct::AUTOLOAD", 0);
+    CV *member = get_cv("OpenOffice::UNO::Struct::AUTOLOAD", 0);
     char *mname;
 
     mname = SvPVX(member);
@@ -877,6 +902,21 @@ CODE:
         RETVAL = new UNO_Boolean(ST(1));
     } else {
         RETVAL = new UNO_Boolean();
+    }
+}
+OUTPUT:
+    RETVAL
+
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Int32	PREFIX = UNO_
+
+UNO_Int32 *
+UNO_Int32::new(...)
+CODE:
+{
+    if ( items == 2 ) {
+        RETVAL = new UNO_Int32(ST(1));
+    } else {
+        RETVAL = new UNO_Int32();
     }
 }
 OUTPUT:
