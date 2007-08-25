@@ -133,8 +133,6 @@ WriteMakefile (
     'clean'	=> { 'FILES'     => 'test2.sxw perluno',
 		     },
     'XSOPT'	=> '-C++',
-    'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
-    'VERSION'	=> '0.01'
     'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
 			       'Mattia Barbon <mbarbon@cpan.org>' ),
     'VERSION_FROM'=> 'UNO.pm',
