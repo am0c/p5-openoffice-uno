@@ -114,9 +114,9 @@ WriteMakefile (
     'LDDLFLAGS'	=> $uno_lib . ' ' . $Config{'lddlflags'}  . ' ',
     'LIBS'	=> [ $uno_lib . ' ' . $LinkLibs ],
     'INC'	=> $uno_inc,
-    'depend'	=> { '$(OBJECT)' => 'blib/uno/headers',
+    'depend'	=> { '$(OBJECT)' => 'blib/uno/headers perluno',
                       },
-    'clean'	=> { 'FILES'     => 'test2.sxw',
+    'clean'	=> { 'FILES'     => 'test2.sxw perluno',
                       },
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
@@ -172,10 +172,13 @@ $out/headers : $out
 	$sdk_dir/$sdk_platf/bin/cppumaker -Gc -BUCR -O$abs_out $interfaces $ENV{'OO_SDK_URE_BIN_DIR'}/types.rdb
 	\$(TOUCH) $out/headers
 
-uno_stuff: $out/headers
+uno_stuff: $out/headers perluno
 
 $out :
 	\$(MKPATH) $out
+
+perluno : perluno.tmpl
+	\$(PERL) -pe "s<UNO_PATH><$ENV{'OO_SDK_URE_LIB_DIR'}>" -- perluno.tmpl > perluno
 
 EOT
 }

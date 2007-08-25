@@ -7,7 +7,7 @@ UNO.xs
 UNO.h
 ppport.h
 typemap
-perluno
+perluno.tmpl
 test1.sxw
 README
 t/01.t
