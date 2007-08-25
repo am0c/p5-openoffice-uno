@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 #*************************************************************************
 #
 #  $RCSfile$
@@ -59,21 +60,34 @@
 #
 #***********************************************************************
 
+use warnings;
+
 use ExtUtils::MakeMaker;
 use File::Find;
 use File::Basename;
 use Config;
 use Cwd;
 
-if ( $Config{'ccversion'} eq "Sun WorkShop" ) {
-} elsif ( $Config{'gccversion'} ne "" ) {
-}
-
-$sdk_platf = 'linux';
 $sdk_dir = $ENV{'OO_SDK_HOME'};
-$uno_def = $ENV{'SOLARDEF'} || "";
-$uno_lib = $ENV{'SOLARLIB'} || "-L$ENV{'OO_SDK_URE_LIB_DIR'}";
-$uno_inc = $ENV{'SOLARINC'} || "-I$ENV{'OO_SDK_HOME'}";
+$cc = $ENV{'CXX'} || $Config{'cc'};
+$ld = $ENV{'CXX'} || $Config{'ld'};
+$cc_flags = '';
+if( $^O eq 'MSWin32' ) {
+    $sdk_platf = 'windows';
+    $uno_def   = '';
+} else {
+    @config = split '-', qx[$sdk_dir/config.guess];
+    if( $config[2] eq 'linux' ) {
+        $cc = $ld = $ENV{'CXX'} || 'g++',
+        $sdk_platf = 'linux';
+        $uno_def   = '-DCPPU_ENV=gcc3 -DLINUX -DUNX';
+    } else {
+        die "Please add a case for your sdk platform: ", join '-', @config;
+    }
+}
+$uno_lib = "-L$ENV{'OO_SDK_URE_LIB_DIR'}";
+$uno_inc = "-I$ENV{'OO_SDK_HOME'}";
+
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
 @LPath = split(" ", $uno_lib);
 
@@ -107,20 +121,25 @@ for $ky (keys(%SLib)) {
 
 WriteMakefile (       
     'NAME'	=> 'OpenOffice::UNO',
-    'CC'	=> $ENV{'CC'},
-    'LD'	=> $ENV{'CC'},
-    'CCFLAGS'	=> $uno_def . " -g -Iblib/uno -I$sdk_dir/include -DCPPU_ENV=gcc3 -fPIC -DLINUX -DUNX -DGXX_INCLUDE_PATH=" . $ENV{'GXX_INCLUDE_PATH'},
-    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' -g ' . $Config{'lddlflags'} . ' ',
+    'CC'	=> $cc,
+    'LD'	=> $ld,
+    'CCFLAGS'	=> $uno_def . " " . $cc_flags,
+    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' ' . $Config{'lddlflags'} . ' ',
     'LDDLFLAGS'	=> $uno_lib . ' ' . $Config{'lddlflags'}  . ' ',
     'LIBS'	=> [ $uno_lib . ' ' . $LinkLibs ],
-    'INC'	=> $uno_inc,
+    'INC'	=> $uno_inc . " -Iblib/uno -I$sdk_dir/include ",
     'depend'	=> { '$(OBJECT)' => 'blib/uno/headers perluno',
-                      },
+		     },
     'clean'	=> { 'FILES'     => 'test2.sxw perluno',
-                      },
+		     },
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
     'VERSION'	=> '0.01'
+    'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
+			       'Mattia Barbon <mbarbon@cpan.org>' ),
+    'VERSION_FROM'=> 'UNO.pm',
+    'ABSTRACT_FROM'=> 'UNO.pm',
+    'LICENSE'	=> 'lgpl',
 );
 
 exit(0);
@@ -198,7 +217,7 @@ sub getReqLib {
 
 sub getlib {
     if ( ($File::Find::name =~ m/${clib}/) ) {
-	($libname, $dpath) = fileparse($File::Find::name);
+	($libname, undef) = fileparse($File::Find::name);
 	if ( ($libname =~ m/^lib/) && ($libname =~ m/\.so$/) ) {
 	    if ( ! defined($FLib{$clib}) ) {
 		$FLib{$clib} = $libname;
