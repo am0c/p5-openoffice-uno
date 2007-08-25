@@ -63,15 +63,19 @@ use ExtUtils::MakeMaker;
 use File::Find;
 use File::Basename;
 use Config;
+use Cwd;
 
 if ( $Config{'ccversion'} eq "Sun WorkShop" ) {
-    
 } elsif ( $Config{'gccversion'} ne "" ) {
 }
 
+$sdk_platf = 'linux';
+$sdk_dir = $ENV{'OO_SDK_HOME'};
+$uno_def = $ENV{'SOLARDEF'} || "";
+$uno_lib = $ENV{'SOLARLIB'} || "-L$ENV{'OO_SDK_URE_LIB_DIR'}";
+$uno_inc = $ENV{'SOLARINC'} || "-I$ENV{'OO_SDK_HOME'}";
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
-
-@LPath = split(" ", $ENV{'SOLARLIB'});
+@LPath = split(" ", $uno_lib);
 
 for ($i=0; $i <= $#LPath; $i++) {
     $LPath[$i] =~ s/-L//;
@@ -105,11 +109,15 @@ WriteMakefile (
     'NAME'	=> 'OpenOffice::UNO',
     'CC'	=> $ENV{'CC'},
     'LD'	=> $ENV{'CC'},
-    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -DGXX_INCLUDE_PATH=' . $ENV{'GXX_INCLUDE_PATH'} . " ", 
-    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' ' . $Config{'lddlflags'} . ' ',
-    'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' ' . $Config{'lddlflags'}  . ' ',
-    'LIBS'	=> [ $ENV{'SOLARLIB'} .  $LinkLibs ],
-    'INC'	=> $ENV{'SOLARINC'},
+    'CCFLAGS'	=> $uno_def . " -g -Iblib/uno -I$sdk_dir/include -DCPPU_ENV=gcc3 -fPIC -DLINUX -DUNX -DGXX_INCLUDE_PATH=" . $ENV{'GXX_INCLUDE_PATH'},
+    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' -g ' . $Config{'lddlflags'} . ' ',
+    'LDDLFLAGS'	=> $uno_lib . ' ' . $Config{'lddlflags'}  . ' ',
+    'LIBS'	=> [ $uno_lib . ' ' . $LinkLibs ],
+    'INC'	=> $uno_inc,
+    'depend'	=> { '$(OBJECT)' => 'blib/uno/headers',
+                      },
+    'clean'	=> { 'FILES'     => 'test2.sxw',
+                      },
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
     'VERSION'	=> '0.01'
@@ -119,6 +127,58 @@ exit(0);
 
 # Remove the Makefile dependency. Causes problems on a few systems.
 sub MY::makefile { '' }
+
+sub MY::postamble {
+    my $cwd = cwd();
+    my $out = 'blib/uno';
+    my $abs_out = File::Spec->rel2abs( $out );
+    my $interfaces = join ' ', map '-T' . $_,
+      qw(com.sun.star.lang.IllegalArgumentException
+         com.sun.star.uno.RuntimeException
+         com.sun.star.uno.TypeClass
+         com.sun.star.uno.XAggregation
+         com.sun.star.uno.XComponentContext
+         com.sun.star.lang.XInitialization
+         com.sun.star.lang.XMultiComponentFactory
+         com.sun.star.lang.XMultiServiceFactory
+         com.sun.star.registry.XRegistryKey
+         com.sun.star.lang.XServiceInfo
+         com.sun.star.lang.XSingleComponentFactory
+         com.sun.star.lang.XSingleServiceFactory
+         com.sun.star.lang.XTypeProvider
+         com.sun.star.uno.XWeak
+         com.sun.star.lang.XComponent
+         com.sun.star.bridge.XUnoUrlResolver
+         com.sun.star.frame.XComponentLoader
+         com.sun.star.container.XHierarchicalNameAccess
+         com.sun.star.uno.DeploymentException
+         com.sun.star.registry.XSimpleRegistry
+         com.sun.star.reflection.XIdlClass
+         com.sun.star.reflection.XIdlReflection
+         com.sun.star.beans.XMaterialHolder
+         com.sun.star.script.XTypeConverter
+         com.sun.star.beans.XIntrospection
+         com.sun.star.script.XInvocation2
+         );
+
+    return <<EOT;
+#$out/some.urd : $out some.idl
+#	$sdk_dir/$sdk_platf/bin/idlc -I. -I$sdk_dir/idl -O$abs_out some.idl
+
+#$out/moo.uno.rdb : $out $out/some.urd
+#	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
+
+$out/headers : $out
+	$sdk_dir/$sdk_platf/bin/cppumaker -Gc -BUCR -O$abs_out $interfaces $ENV{'OO_SDK_URE_BIN_DIR'}/types.rdb
+	\$(TOUCH) $out/headers
+
+uno_stuff: $out/headers
+
+$out :
+	\$(MKPATH) $out
+
+EOT
+}
 
 sub getReqLib {
     $cdir = $_[0];
