@@ -1,12 +1,12 @@
 Changes
 Makefile.PL
 MANIFEST
+MANIFEST.SKIP
 UNO.pm
 UNO.xs
 UNO.h
 ppport.h
 typemap
-lib/UNO/Interface.pm
 perluno
 test1.sxw
 README
@@ -22,3 +22,7 @@ t/09.t
 t/10.t
 t/11.t
 t/12.t
+t/13.t
+t/14.t
+t/15.t
+t/16.t
