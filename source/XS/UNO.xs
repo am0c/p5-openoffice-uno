@@ -59,77 +59,77 @@
  *
  ************************************************************************/
 
-#include "Perluno.h"
+#include "UNO.h"
 
-// Perluno Runtime Instance
-static PerlRT PerlunoInstance;
+// UNO Runtime Instance
+static PerlRT UNOInstance;
 
-Perluno::Perluno() {
+UNO::UNO() {
     ctx = NULL;
 }
 
-Perluno::~Perluno() {
-    PerlunoInstance.prtInitialized = FALSE;
+UNO::~UNO() {
+    UNOInstance.prtInitialized = FALSE;
 }
 
 void
-Perluno::createServices() {
-    PerlunoInstance.ssf = Perluno_XSingleServiceFactory(
-	PerlunoInstance.localCtx->getServiceManager()->createInstanceWithContext(
-	    PERLUNO_INVOCATION_OBJECT, PerlunoInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
+UNO::createServices() {
+    UNOInstance.ssf = UNO_XSingleServiceFactory(
+	UNOInstance.localCtx->getServiceManager()->createInstanceWithContext(
+	    UNO_INVOCATION_OBJECT, UNOInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
 
-    if( ! PerlunoInstance.ssf.is() )
+    if( ! UNOInstance.ssf.is() )
 	throw ::com::sun::star::uno::RuntimeException(
-	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "Perluno: couldn't instantiate Single Service Manager" )),
-		Perluno_XInterface () );
+	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "UNO: couldn't instantiate Single Service Manager" )),
+		UNO_XInterface () );
 
-    PerlunoInstance.typecvt = Perluno_XTypeConverter(
-	PerlunoInstance.localCtx->getServiceManager()->createInstanceWithContext(
-	    PERLUNO_TYPECONVERTER_OBJECT, PerlunoInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
+    UNOInstance.typecvt = UNO_XTypeConverter(
+	UNOInstance.localCtx->getServiceManager()->createInstanceWithContext(
+	    UNO_TYPECONVERTER_OBJECT, UNOInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
 
-    if( ! PerlunoInstance.typecvt.is() )
+    if( ! UNOInstance.typecvt.is() )
 	throw ::com::sun::star::uno::RuntimeException(
-	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "Perluno: couldn't instantiate typeconverter service" )),
-		Perluno_XInterface () );
+	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "UNO: couldn't instantiate typeconverter service" )),
+		UNO_XInterface () );
 
-    PerlunoInstance.reflection = Perluno_XIdlReflection (
-        PerlunoInstance.localCtx->getServiceManager()->createInstanceWithContext(
-	    PERLUNO_COREREFLECTION_OBJECT, PerlunoInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
+    UNOInstance.reflection = UNO_XIdlReflection (
+        UNOInstance.localCtx->getServiceManager()->createInstanceWithContext(
+	    UNO_COREREFLECTION_OBJECT, UNOInstance.localCtx ), ::com::sun::star::uno::UNO_QUERY );
 
-    if( ! PerlunoInstance.reflection.is() )
+    if( ! UNOInstance.reflection.is() )
 	throw ::com::sun::star::uno::RuntimeException(
-	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "Perluno: couldn't instantiate reflection service" )),
-		Perluno_XInterface () );
+	    ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "UNO: couldn't instantiate reflection service" )),
+		UNO_XInterface () );
 }
 
-Perluno_Struct::Perluno_Struct() {
+UNO_Struct::UNO_Struct() {
 }
 
-Perluno_Struct::Perluno_Struct(char *sname) {
+UNO_Struct::UNO_Struct(char *sname) {
     ::rtl::OUString soname = ::rtl::OUString::createFromAscii(sname);
 
-    Perluno_SAny args(1);
-    Perluno_XInterface tif;
-    Perluno_XAny tstruct;
-    Perluno_XIdlClass idlclass(PerlunoInstance.reflection->forName(soname), ::com::sun::star::uno::UNO_QUERY);
+    UNO_SAny args(1);
+    UNO_XInterface tif;
+    UNO_XAny tstruct;
+    UNO_XIdlClass idlclass(UNOInstance.reflection->forName(soname), ::com::sun::star::uno::UNO_QUERY);
     if (! idlclass.is()) {
-	fprintf(stderr, "Perluno: failed to create IdlClass\n");
+	fprintf(stderr, "UNO: failed to create IdlClass\n");
 	return;
     }
 
     idlclass->createObject(tstruct);
 
     args[0] <<= tstruct;
-    tif = PerlunoInstance.ssf->createInstanceWithArguments(args);
+    tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "Perluno: Proxy creation failed\n");
+	fprintf(stderr, "UNO: Proxy creation failed\n");
         return;
     }
 
-    xinvoke = Perluno_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
+    xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: XInvocation2 failed to be created\n");
+	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
         return;
     }
 
@@ -137,36 +137,36 @@ Perluno_Struct::Perluno_Struct(char *sname) {
     TypeString = strdup(sname);
 }
 
-Perluno_Struct::Perluno_Struct(Perluno_XAny tany) {
-    Perluno_SAny args(1);
-    Perluno_XInterface tif;
+UNO_Struct::UNO_Struct(UNO_XAny tany) {
+    UNO_SAny args(1);
+    UNO_XInterface tif;
 
     args[0] <<= tany;
-    tif = PerlunoInstance.ssf->createInstanceWithArguments(args);
+    tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "Perluno: Proxy creation failed\n");
+	fprintf(stderr, "UNO: Proxy creation failed\n");
         return;
     }
 
-    xinvoke = Perluno_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
+    xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: XInvocation2 failed to be created\n");
+	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
         return;
     }
 
     pany = tany;
 }
 
-Perluno_Struct::~Perluno_Struct() {
+UNO_Struct::~UNO_Struct() {
 }
 
 void
-Perluno_Struct::set(char *mname, SV *value) {
-    Perluno_XAny aval;
+UNO_Struct::set(char *mname, SV *value) {
+    UNO_XAny aval;
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
+	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
 	return;
     }
 
@@ -182,11 +182,11 @@ Perluno_Struct::set(char *mname, SV *value) {
 }
 
 SV *
-Perluno_Struct::get(char *mname) {
-    Perluno_XAny aval;
+UNO_Struct::get(char *mname) {
+    UNO_XAny aval;
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
+	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
 	return (SV *)Nullsv;
     }
 
@@ -200,64 +200,64 @@ Perluno_Struct::get(char *mname) {
     return AnyToSV(aval);
 }
 
-Perluno_Interface *
-Perluno::createInitialComponentContext(char *iniFile) {
-    PerlunoInstance.localCtx = cppu::defaultBootstrap_InitialComponentContext(
+UNO_Interface *
+UNO::createInitialComponentContext(char *iniFile) {
+    UNOInstance.localCtx = cppu::defaultBootstrap_InitialComponentContext(
 	::rtl::OUString::createFromAscii(iniFile) );
-    PerlunoInstance.prtInitialized = TRUE;
+    UNOInstance.prtInitialized = TRUE;
     createServices();
 
-    Perluno_XAny tany;
-    tany <<= PerlunoInstance.localCtx;
+    UNO_XAny tany;
+    tany <<= UNOInstance.localCtx;
 
-    ctx = new Perluno_Interface(tany);
+    ctx = new UNO_Interface(tany);
     return ctx;
 }
 
-Perluno_Interface *
-Perluno::createInitialComponentContext() {
-    PerlunoInstance.localCtx = cppu::defaultBootstrap_InitialComponentContext();
-    PerlunoInstance.prtInitialized = TRUE;
+UNO_Interface *
+UNO::createInitialComponentContext() {
+    UNOInstance.localCtx = cppu::defaultBootstrap_InitialComponentContext();
+    UNOInstance.prtInitialized = TRUE;
     createServices();
 
-    Perluno_XAny tany;
-    tany <<= PerlunoInstance.localCtx;
+    UNO_XAny tany;
+    tany <<= UNOInstance.localCtx;
 
-    ctx = new Perluno_Interface(tany);
+    ctx = new UNO_Interface(tany);
     return ctx;
 }
 
-Perluno_Struct *
-Perluno::createIdlStruct(char *name) {
-    return new Perluno_Struct(name);
+UNO_Struct *
+UNO::createIdlStruct(char *name) {
+    return new UNO_Struct(name);
 }
 
-Perluno_Interface::Perluno_Interface() {
+UNO_Interface::UNO_Interface() {
 }
 
-Perluno_Interface::Perluno_Interface(Perluno_XAny thisif) {
-    Perluno_SAny args(1);
-    Perluno_XInterface tif;
+UNO_Interface::UNO_Interface(UNO_XAny thisif) {
+    UNO_SAny args(1);
+    UNO_XInterface tif;
 
     // Check if ref is valid
-    Perluno_XInterface cif;
+    UNO_XInterface cif;
     thisif >>= cif;
     if ( ! cif.is() ) {
-	fprintf(stderr, "Perluno: invalid interface ref\n");
+	fprintf(stderr, "UNO: invalid interface ref\n");
         return;
     }
 
     args[0] <<= thisif;
-    tif = PerlunoInstance.ssf->createInstanceWithArguments(args);
+    tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "Perluno: Proxy creation failed\n");
+	fprintf(stderr, "UNO: Proxy creation failed\n");
         return;
     }
 
-    xinvoke = Perluno_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
+    xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: XInvocation2 failed to be created\n");
+	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
         return;
     }
 
@@ -265,23 +265,23 @@ Perluno_Interface::Perluno_Interface(Perluno_XAny thisif) {
 }
 
 SV *
-Perluno_Interface::invoke(char *method, Perluno_SAny args) {
+UNO_Interface::invoke(char *method, UNO_SAny args) {
     I32 i;
 
     ::rtl::OUString mstr = ::rtl::OUString::createFromAscii(method);
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "Perluno: Invalid XInvocation2 ref\n");
+	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
 	return (SV *)Nullsv;
     }
 
     if ( ! xinvoke->hasMethod(mstr) ) {
-	fprintf(stderr, "Perluno: Method: \"%s\" is NOT defined\n", method);
+	fprintf(stderr, "UNO: Method: \"%s\" is NOT defined\n", method);
 	return (SV *)Nullsv;
     }
 
-    Perluno_SAny oargs;
-    Perluno_SShort oidx;
-    Perluno_XAny ret_val;
+    UNO_SAny oargs;
+    UNO_SShort oidx;
+    UNO_XAny ret_val;
 
     ret_val = xinvoke->invoke(mstr, args, oidx, oargs);
 
@@ -298,7 +298,7 @@ Perluno_Interface::invoke(char *method, Perluno_SAny args) {
 	// Convert output parameters
 	av_extend(av, oargs.getLength()+1);
 	for ( int i = 0; i < oargs.getLength(); i++ ) {
-	    SV *tav = AnyToSV(PerlunoInstance.typecvt->convertTo(oargs[i], oargs[i].getValueType()));
+	    SV *tav = AnyToSV(UNOInstance.typecvt->convertTo(oargs[i], oargs[i].getValueType()));
 	    av_store(av, i+1, tav);
 	}
 	retval = (SV *)av;
@@ -310,13 +310,13 @@ Perluno_Interface::invoke(char *method, Perluno_SAny args) {
     return retval;
 }
 
-Perluno_XAny
-Perluno_Any::getAny() {
+UNO_XAny
+UNO_Any::getAny() {
 	return pany;
 }
 
 static void
-PerlunoExit(pTHX_ void *pi) {
+UNOExit(pTHX_ void *pi) {
     // Clean up PerlRT
     ((PerlRT *)pi)->reflection.clear();
     ((PerlRT *)pi)->typecvt.clear();
@@ -328,14 +328,14 @@ void
 Bootstrap(pTHX) {
     dSP;
 
-    PerlunoInstance.prtInitialized = 0;
+    UNOInstance.prtInitialized = 0;
 
-    perl_atexit(PerlunoExit, (void *)&PerlunoInstance);
+    perl_atexit(UNOExit, (void *)&UNOInstance);
 }
 
-Perluno_SAny
+UNO_SAny
 AVToSAny(AV *parr) {
-    Perluno_SAny aany;
+    UNO_SAny aany;
 
     if ( av_len(parr) >= 0 ) {
 	aany.realloc(av_len(parr) + 1);
@@ -346,30 +346,30 @@ AVToSAny(AV *parr) {
     return aany;
 }
 
-Perluno_XAny
+UNO_XAny
 HVToStruct(HV *hv) {
-    Perluno_XAny a;
+    UNO_XAny a;
 
-    SV *smagic = newSVpv(PERLUNO_STRUCT_NAME_KEY, strlen(PERLUNO_STRUCT_NAME_KEY));
+    SV *smagic = newSVpv(UNO_STRUCT_NAME_KEY, strlen(UNO_STRUCT_NAME_KEY));
     if ( hv_exists_ent(hv, smagic, 0) ) {
 	char *key;
 	I32 klen;
 	SV *val;
 
-	SV **pname = hv_fetch(hv, PERLUNO_STRUCT_NAME_KEY, strlen(PERLUNO_STRUCT_NAME_KEY), FALSE);
+	SV **pname = hv_fetch(hv, UNO_STRUCT_NAME_KEY, strlen(UNO_STRUCT_NAME_KEY), FALSE);
 	char *cname = SvPVX(*pname);
 
 	::rtl::OUString sname = ::rtl::OUString::createFromAscii(cname);
 
-	Perluno_XMaterialHolder mholder( PerlunoInstance.ssf, ::com::sun::star::uno::UNO_QUERY );
+	UNO_XMaterialHolder mholder( UNOInstance.ssf, ::com::sun::star::uno::UNO_QUERY );
 	if ( mholder.is( ) )
 		a = mholder->getMaterial();
 
 	// Iterate through hash
 	hv_iterinit(hv);
 	while (val = hv_iternextsv(hv, (char **) &key, &klen)) {
-	    if ( strcmp(key, PERLUNO_STRUCT_NAME_KEY) ) {
-		Perluno_XAny tany;
+	    if ( strcmp(key, UNO_STRUCT_NAME_KEY) ) {
+		UNO_XAny tany;
 
 		tany = SVToAny(val);
 	    }
@@ -378,9 +378,9 @@ HVToStruct(HV *hv) {
     return a;
 }
 
-Perluno_XAny
+UNO_XAny
 SVToAny(SV *svp) {
-    Perluno_XAny a;
+    UNO_XAny a;
 
     switch ( SvTYPE(svp) ) {
 	case SVt_NULL:
@@ -404,7 +404,7 @@ SVToAny(SV *svp) {
 		switch ( SvTYPE(SvRV(svp)) ) {
 		     case SVt_PVAV: {
 			AV *parr = (AV *)SvRV(svp);
-			Perluno_SAny aany = AVToSAny(parr);
+			UNO_SAny aany = AVToSAny(parr);
 			a <<= aany;
 
 			break;
@@ -413,13 +413,13 @@ SVToAny(SV *svp) {
 		    case SVt_RV: {
 			long otype;
 			IV tmp = SvIV((SV*)SvRV(svp));
-			Perluno_Any *tptr = INT2PTR(Perluno_Any *,tmp);
+			UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
 
-			Perluno_XAny tany = tptr->getAny();
+			UNO_XAny tany = tptr->getAny();
 
 			switch (tany.getValueTypeClass()) {
 			    case typelib_TypeClass_STRUCT: {
-				Perluno_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
+				UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
 				if( mh.is() ) {
 				    a = mh->getMaterial();
 				} else {
@@ -438,6 +438,10 @@ SVToAny(SV *svp) {
 				break;
 			    }
 
+			    case typelib_TypeClass_LONG: {
+				a = tany;
+				break;
+			    }
 
 			    default: {
 				fprintf(stderr, "Unsupported ref: %d\n", tany.getValueTypeClass());
@@ -451,17 +455,18 @@ SVToAny(SV *svp) {
 		    case SVt_PVMG: {
 			long otype;
 			IV tmp = SvIV((SV*)SvRV(svp));
-			Perluno_Any *tptr = INT2PTR(Perluno_Any *,tmp);
-			Perluno_XAny tany = tptr->getAny();
+			UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
+
+			UNO_XAny tany = tptr->getAny();
+
 			switch (tany.getValueTypeClass()) {
 			    case typelib_TypeClass_STRUCT: {
-				Perluno_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
+				UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
 				if( mh.is() ) {
 				    a = mh->getMaterial();
 				} else {
 				    fprintf(stderr, "Error getting Material\n");
 				}
-//				a <<= tany;
 				break;
 			    }
 
@@ -471,6 +476,11 @@ SVToAny(SV *svp) {
 			    }
 
 			    case typelib_TypeClass_BOOLEAN: {
+				a = tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_LONG: {
 				a = tany;
 				break;
 			    }
@@ -485,7 +495,7 @@ SVToAny(SV *svp) {
 
 		    case SVt_PVHV: {
 			HV *hv = (HV *)SvRV(svp);
-			Perluno_XAny aany = HVToStruct(hv);
+			UNO_XAny aany = HVToStruct(hv);
 			a <<= aany;
 
 			break;
@@ -549,20 +559,20 @@ SVToAny(SV *svp) {
 }
 
 AV *
-SAnyToAV(Perluno_SAny sa) {
+SAnyToAV(UNO_SAny sa) {
     AV *av;
 
     av = newAV();
     av_extend(av, sa.getLength());
     for ( int i = 0; i < sa.getLength(); i++ ) {
-	SV *tav = AnyToSV(PerlunoInstance.typecvt->convertTo(sa[i], sa[i].getValueType()));
+	SV *tav = AnyToSV(UNOInstance.typecvt->convertTo(sa[i], sa[i].getValueType()));
 	av_store(av, i, tav);
     }
     return av;
 }
 
 SV *
-AnyToSV(Perluno_XAny a) {
+AnyToSV(UNO_XAny a) {
     SV *svp;
     SV *ret;
 
@@ -671,25 +681,25 @@ AnyToSV(Perluno_XAny a) {
 	}
 
 	case typelib_TypeClass_STRUCT: {
-	    Perluno_Struct *tret = new Perluno_Struct(a);
+	    UNO_Struct *tret = new UNO_Struct(a);
 	    SV *mret = sv_newmortal();
 	    ret = newRV_inc(mret);
-	    sv_setref_pv(ret, "Perluno::Struct", (void *)tret);
+	    sv_setref_pv(ret, "OpenOffice::UNO::Struct", (void *)tret);
 	    break;
 	}
 
 	case typelib_TypeClass_SEQUENCE: {
-	    Perluno_SAny sa;
-	    PerlunoInstance.typecvt->convertTo(a, ::getCppuType(&sa)) >>= sa;
+	    UNO_SAny sa;
+	    UNOInstance.typecvt->convertTo(a, ::getCppuType(&sa)) >>= sa;
 	    ret = (SV *)SAnyToAV(sa);
 	    break;
 	}
 
 	case typelib_TypeClass_INTERFACE: {
-	    Perluno_Interface *tret = new Perluno_Interface(a);
+	    UNO_Interface *tret = new UNO_Interface(a);
 	    SV *mret = sv_newmortal();
 	    ret = newRV_inc(mret);
-	    sv_setref_pv(ret, "Perluno::Interface", (void *)tret);
+	    sv_setref_pv(ret, "OpenOffice::UNO::Interface", (void *)tret);
 	    break;
 	}
 
@@ -702,46 +712,61 @@ AnyToSV(Perluno_XAny a) {
     return ret;
 }
 
-Perluno_Boolean::Perluno_Boolean() {
+UNO_Boolean::UNO_Boolean() {
     sal_Bool b = sal_False;
-    pany = Perluno_XAny(&b, getBooleanCppuType());
+    pany = UNO_XAny(&b, getBooleanCppuType());
     bvalue = sal_False;
 }
 
-Perluno_Boolean::Perluno_Boolean(SV *bval) {
+UNO_Boolean::UNO_Boolean(SV *bval) {
     sal_Bool b = (sal_Bool)SvTRUE(bval);
-    pany = Perluno_XAny(&b, getBooleanCppuType());
+    pany = UNO_XAny(&b, getBooleanCppuType());
     bvalue = b;
 }
 
-Perluno_Boolean::~Perluno_Boolean() {
+UNO_Boolean::~UNO_Boolean() {
 }
 
-MODULE = Perluno     	PACKAGE = Perluno	PREFIX = Perluno_
+UNO_Int32::UNO_Int32() {
+    sal_Int32 i = sal_False;
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = 0;
+}
+
+UNO_Int32::UNO_Int32(SV *ival) {
+    sal_Int32 i = (sal_Int32)SvIV(ival);
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = i;
+}
+
+UNO_Int32::~UNO_Int32() {
+}
+
+MODULE = OpenOffice::UNO     	PACKAGE = OpenOffice::UNO	PREFIX = UNO_
 
 PROTOTYPES: DISABLE
 
 BOOT:
     Bootstrap(aTHX);
 
-Perluno *
-Perluno::new(...)
+UNO *
+UNO::new(...)
 CODE:
 {
-    RETVAL = new Perluno();
+    RETVAL = new UNO();
 }
 OUTPUT:
     RETVAL
 
 void
-Perluno::DESTROY(...)
+UNO::DESTROY(...)
 CODE:
 {
     delete(THIS);
 }
 
-Perluno_Interface *
-Perluno::createInitialComponentContext(...)
+UNO_Interface *
+UNO::createInitialComponentContext(...)
 CODE:
 {
     if ( items == 1 ) {
@@ -757,29 +782,29 @@ CODE:
 OUTPUT:
     RETVAL
 
-Perluno_Struct *
-Perluno::createIdlStruct(...)
+UNO_Struct *
+UNO::createIdlStruct(...)
 CODE:
 {
     char *name;
     STRLEN len;
 
     name = SvPV(ST(1), len);
-    Perluno_Struct *tret = THIS->createIdlStruct(name);
+    UNO_Struct *tret = THIS->createIdlStruct(name);
     RETVAL = tret;
 }
 OUTPUT:
     RETVAL
 
-MODULE = Perluno	PACKAGE = Perluno::Interface	PREFIX = Perluno_
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Interface	PREFIX = UNO_
 
-Perluno_Interface *
-Perluno_Interface::new(...)
+UNO_Interface *
+UNO_Interface::new(...)
 CODE:
 {
-    Perluno_Interface *retval;
+    UNO_Interface *retval;
     
-    retval = new Perluno_Interface();
+    retval = new UNO_Interface();
 
     RETVAL = retval;
 }
@@ -787,18 +812,18 @@ OUTPUT:
     RETVAL
 
 SV *
-Perluno_Interface::AUTOLOAD(...)
+UNO_Interface::AUTOLOAD(...)
 CODE:
 {
-    CV *method = get_cv("Perluno::Interface::AUTOLOAD", 0);
+    CV *method = get_cv("OpenOffice::UNO::Interface::AUTOLOAD", 0);
 
     I32 i;
-    Perluno_SAny args;
+    UNO_SAny args;
 
     if ( items > 1 ) {
 	args.realloc(items-1);
 	for ( i = 1; i < items; i++ ) {
-	    Perluno_XAny a = SVToAny(ST(i));
+	    UNO_XAny a = SVToAny(ST(i));
 	    args[i-1] <<= a;
 	}
     }
@@ -809,27 +834,27 @@ OUTPUT:
     RETVAL
 
 void
-Perluno_Interface::DESTROY(...)
+UNO_Interface::DESTROY(...)
 CODE:
 {
     delete(THIS);
 }
 
-MODULE = Perluno	PACKAGE = Perluno::Struct	PREFIX = Perluno_
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Struct	PREFIX = UNO_
 
-Perluno_Struct *
-Perluno_Struct::new(...)
+UNO_Struct *
+UNO_Struct::new(...)
 CODE:
 {
-    Perluno_Struct *ret;
+    UNO_Struct *ret;
 
-    ret = (Perluno_Struct *)NULL;
+    ret = (UNO_Struct *)NULL;
     if ( items == 2 ) {
 	char *stype;
 	STRLEN len;
 
 	stype = SvPV(ST(1), len);
-	ret = new Perluno_Struct(stype);
+	ret = new UNO_Struct(stype);
     }
     RETVAL = ret;
 }
@@ -837,17 +862,17 @@ OUTPUT:
     RETVAL
 
 void
-Perluno_Struct::DESTROY(...)
+UNO_Struct::DESTROY(...)
 CODE:
 {
     delete(THIS);
 }
 
 SV *
-Perluno_Struct::AUTOLOAD(...)
+UNO_Struct::AUTOLOAD(...)
 CODE:
 {
-    CV *member = get_cv("Perluno::Struct::AUTOLOAD", 0);
+    CV *member = get_cv("OpenOffice::UNO::Struct::AUTOLOAD", 0);
     char *mname;
 
     mname = SvPVX(member);
@@ -867,16 +892,31 @@ CODE:
 OUTPUT:
     RETVAL
 
-MODULE = Perluno	PACKAGE = Perluno::Boolean	PREFIX = Perluno_
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Boolean	PREFIX = UNO_
 
-Perluno_Boolean *
-Perluno_Boolean::new(...)
+UNO_Boolean *
+UNO_Boolean::new(...)
 CODE:
 {
     if ( items == 2 ) {
-        RETVAL = new Perluno_Boolean(ST(1));
+        RETVAL = new UNO_Boolean(ST(1));
     } else {
-        RETVAL = new Perluno_Boolean();
+        RETVAL = new UNO_Boolean();
+    }
+}
+OUTPUT:
+    RETVAL
+
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Int32	PREFIX = UNO_
+
+UNO_Int32 *
+UNO_Int32::new(...)
+CODE:
+{
+    if ( items == 2 ) {
+        RETVAL = new UNO_Int32(ST(1));
+    } else {
+        RETVAL = new UNO_Int32();
     }
 }
 OUTPUT:

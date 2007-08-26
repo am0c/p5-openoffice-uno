@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 #*************************************************************************
 #
 #  $RCSfile$
@@ -59,19 +60,181 @@
 #
 #***********************************************************************
 
+use warnings;
+
 use ExtUtils::MakeMaker;
+use File::Find;
+use File::Basename;
+use Config;
+use Cwd;
+
+$sdk_dir = $ENV{'OO_SDK_HOME'};
+$cc = $ENV{'CXX'} || $Config{'cc'};
+$ld = $ENV{'CXX'} || $Config{'ld'};
+$cc_flags = '';
+if( $^O eq 'MSWin32' ) {
+    $sdk_platf = 'windows';
+    $uno_def   = '';
+} else {
+    @config = split '-', qx[$sdk_dir/config.guess];
+    $cc = $ld = $ENV{'CXX'} || 'g++';
+    if( $config[2] eq 'linux' ) {
+        $sdk_platf = 'linux';
+        $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DLINUX -DUNX';
+    } elsif( $config[2] eq 'darwin' ) {
+        $sdk_platf = 'macosx';
+        $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DMACOSX -DUNX';
+    } elsif( $config[2] eq 'solaris' ) {
+        if( $config[0] eq 'sparc' ) {
+            $sdk_platf = 'solsparc';
+            $uno_def   = '-DUNX -DSOLARIS -DSPARC -DCPPU_ENV=sunpro5';
+        } else {
+            $sdk_platf = 'solintel';
+            $uno_def   = '-DUNX -DSOLARIS -DX86 -DCPPU_ENV=sunpro5';
+        }
+        $cc = $ld = $ENV{'CXX'} || 'CC';
+    } else {
+        die "Please add a case for your sdk platform: ", join '-', @config;
+    }
+}
+$uno_lib = "-L$ENV{'OO_SDK_URE_LIB_DIR'}";
+$uno_inc = "-I$ENV{'OO_SDK_HOME'}";
+
+@ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
+@LPath = split(" ", $uno_lib);
+
+for ($i=0; $i <= $#LPath; $i++) {
+    $LPath[$i] =~ s/-L//;
+}
+
+$LibsOK = 0;
+%FLib = ();
+%SLib = ();
+# Check all required libs
+for $lib (@ReqLibs) {
+    for $lpath (@LPath) { 
+	$flib = &getReqLib($lpath, $lib);
+	if ( $flib ne "" ) {
+	    $LibsOK = 1;
+	    last;
+	}
+    }
+
+    if ( $LibsOK == 0 ) {
+	print "Library: $lib could not be found\n";
+	exit(-1);
+    }
+}
+
+$LinkLibs = "";
+for $ky (keys(%SLib)) {
+    $LinkLibs .= "-l" . $SLib{$ky} . " ";
+}
 
 WriteMakefile (       
-    'NAME'	=> 'Perluno',
-    'CC'	=> 'g++',
-    'LD'	=> 'g++',
-    'CCFLAGS'	=> $ENV{'SOLARDEF'} . ' -DCPPU_ENV=gcc3 -fPIC ', 
-    'LDDLFLAGS'	=> $ENV{'SOLARLIB'} . ' -shared -Wl,-Bdynamic ',
-    'LIBS'	=> [ $ENV{'SOLARLIB'} . ' -lstdc++ -lcppuhelpergcc3 -lcppu -lsalhelpergcc3 -lsal -lstlport_gcc -lgcc_s '],
-    'INC'	=> $ENV{'SOLARINC'},
-    'AUTHOR'	=> 'Bustamam Harun <bustamam@gmail.com>',
-    'VERSION'	=> '0.01'
+    'NAME'	=> 'OpenOffice::UNO',
+    'CC'	=> $cc,
+    'LD'	=> $ld,
+    'CCFLAGS'	=> $uno_def . " " . $cc_flags,
+    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' ' . $Config{'lddlflags'} . ' ',
+    'LDDLFLAGS'	=> $uno_lib . ' ' . $Config{'lddlflags'}  . ' ',
+    'LIBS'	=> [ $uno_lib . ' ' . $LinkLibs ],
+    'INC'	=> $uno_inc . " -Iblib/uno -I$sdk_dir/include ",
+    'depend'	=> { '$(OBJECT)' => 'blib/uno/headers perluno',
+		     },
+    'clean'	=> { 'FILES'     => 'test2.sxw perluno',
+		     },
+    'XSOPT'	=> '-C++',
+    'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
+			       'Mattia Barbon <mbarbon@cpan.org>' ),
+    'VERSION_FROM'=> 'UNO.pm',
+    'ABSTRACT_FROM'=> 'UNO.pm',
+    'LICENSE'	=> 'lgpl',
 );
+
+exit(0);
 
 # Remove the Makefile dependency. Causes problems on a few systems.
 sub MY::makefile { '' }
+
+sub MY::postamble {
+    my $cwd = cwd();
+    my $out = 'blib/uno';
+    my $abs_out = File::Spec->rel2abs( $out );
+    my $interfaces = join ' ', map '-T' . $_,
+      qw(com.sun.star.lang.IllegalArgumentException
+         com.sun.star.uno.RuntimeException
+         com.sun.star.uno.TypeClass
+         com.sun.star.uno.XAggregation
+         com.sun.star.uno.XComponentContext
+         com.sun.star.lang.XInitialization
+         com.sun.star.lang.XMultiComponentFactory
+         com.sun.star.lang.XMultiServiceFactory
+         com.sun.star.registry.XRegistryKey
+         com.sun.star.lang.XServiceInfo
+         com.sun.star.lang.XSingleComponentFactory
+         com.sun.star.lang.XSingleServiceFactory
+         com.sun.star.lang.XTypeProvider
+         com.sun.star.uno.XWeak
+         com.sun.star.lang.XComponent
+         com.sun.star.bridge.XUnoUrlResolver
+         com.sun.star.frame.XComponentLoader
+         com.sun.star.container.XHierarchicalNameAccess
+         com.sun.star.uno.DeploymentException
+         com.sun.star.registry.XSimpleRegistry
+         com.sun.star.reflection.XIdlClass
+         com.sun.star.reflection.XIdlReflection
+         com.sun.star.beans.XMaterialHolder
+         com.sun.star.script.XTypeConverter
+         com.sun.star.beans.XIntrospection
+         com.sun.star.script.XInvocation2
+         );
+
+    return <<EOT;
+#$out/some.urd : $out some.idl
+#	$sdk_dir/$sdk_platf/bin/idlc -I. -I$sdk_dir/idl -O$abs_out some.idl
+
+#$out/moo.uno.rdb : $out $out/some.urd
+#	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
+
+$out/headers : $out
+	$sdk_dir/$sdk_platf/bin/cppumaker -Gc -BUCR -O$abs_out $interfaces $ENV{'OO_SDK_URE_BIN_DIR'}/types.rdb
+	\$(TOUCH) $out/headers
+
+uno_stuff: $out/headers perluno
+
+$out :
+	\$(MKPATH) $out
+
+perluno : perluno.tmpl
+	\$(PERL) -pe "s<UNO_PATH><$ENV{'OO_SDK_URE_LIB_DIR'}>" -- perluno.tmpl > perluno
+
+EOT
+}
+
+sub getReqLib {
+    $cdir = $_[0];
+    $clib = $_[1];
+
+    push(@dirs, $cdir);
+    find( { wanted => \&getlib }, @dirs, );
+    if ( defined($FLib{$clib}) ) {
+	return($FLib{$clib});
+    } else {
+	return("");
+    }
+}
+
+sub getlib {
+    if ( ($File::Find::name =~ m/${clib}/) ) {
+	($libname, undef) = fileparse($File::Find::name);
+	if ( ($libname =~ m/^lib/) && ($libname =~ m/\.so$/) ) {
+	    if ( ! defined($FLib{$clib}) ) {
+		$FLib{$clib} = $libname;
+		$SLib{$clib} = $libname;
+		$SLib{$clib} =~ s/^lib//;
+		$SLib{$clib} =~ s/\.so$//;
+	    }
+	}
+    }
+}

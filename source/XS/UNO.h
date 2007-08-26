@@ -60,7 +60,6 @@
  ************************************************************************/
 
 #ifndef _PERLUNO_H_
-
 #define _PERLUNO_H_
 
 #ifdef bool
@@ -104,56 +103,56 @@ extern "C" {
 };
 #endif
 
-#define PERLUNO_INVOCATION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Invocation" ))
-#define PERLUNO_TYPECONVERTER_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Converter" ))
-#define PERLUNO_COREREFLECTION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.reflection.CoreReflection" ))
+#define UNO_INVOCATION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Invocation" ))
+#define UNO_TYPECONVERTER_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.script.Converter" ))
+#define UNO_COREREFLECTION_OBJECT ::rtl::OUString( RTL_CONSTASCII_USTRINGPARAM( "com.sun.star.reflection.CoreReflection" ))
 
-#define PERLUNO_STRUCT_NAME_KEY "PerlunoStructName"
+#define UNO_STRUCT_NAME_KEY "UNOStructName"
 
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::uno::XComponentContext > Perluno_XComponentContext;	
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XMultiComponentFactory > Perluno_XMultiComponentFactory;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XMultiServiceFactory > Perluno_XMultiServiceFactory;
-//typedef ::com::sun::star::lang::XMultiComponentFactory Perluno_XMultiComponentFactory;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::uno::XInterface > Perluno_XInterface;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XSingleServiceFactory > Perluno_XSingleServiceFactory;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::script::XTypeConverter > Perluno_XTypeConverter;
-typedef ::com::sun::star::uno::Any Perluno_XAny;
-typedef ::com::sun::star::uno::Sequence< ::com::sun::star::uno::Any > Perluno_SAny;
-typedef ::com::sun::star::uno::Sequence< short > Perluno_SShort;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XServiceInfo > Perluno_XServiceInfo;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XTypeProvider > Perluno_XTypeProvider;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::script::XInvocation2 > Perluno_XInvocation2;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::beans::XMaterialHolder > Perluno_XMaterialHolder;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlClass > Perluno_XIdlClass;
-typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlReflection > Perluno_XIdlReflection;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::uno::XComponentContext > UNO_XComponentContext;	
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XMultiComponentFactory > UNO_XMultiComponentFactory;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XMultiServiceFactory > UNO_XMultiServiceFactory;
+//typedef ::com::sun::star::lang::XMultiComponentFactory UNO_XMultiComponentFactory;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::uno::XInterface > UNO_XInterface;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XSingleServiceFactory > UNO_XSingleServiceFactory;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::script::XTypeConverter > UNO_XTypeConverter;
+typedef ::com::sun::star::uno::Any UNO_XAny;
+typedef ::com::sun::star::uno::Sequence< ::com::sun::star::uno::Any > UNO_SAny;
+typedef ::com::sun::star::uno::Sequence< short > UNO_SShort;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XServiceInfo > UNO_XServiceInfo;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::lang::XTypeProvider > UNO_XTypeProvider;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::script::XInvocation2 > UNO_XInvocation2;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::beans::XMaterialHolder > UNO_XMaterialHolder;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlClass > UNO_XIdlClass;
+typedef ::com::sun::star::uno::Reference< ::com::sun::star::reflection::XIdlReflection > UNO_XIdlReflection;
 
 
 typedef struct _PerlRT {
 	bool prtInitialized;
-	Perluno_XComponentContext localCtx;
-	Perluno_XSingleServiceFactory ssf;
-	Perluno_XTypeConverter typecvt;
-	Perluno_XIdlReflection reflection;
+	UNO_XComponentContext localCtx;
+	UNO_XSingleServiceFactory ssf;
+	UNO_XTypeConverter typecvt;
+	UNO_XIdlReflection reflection;
 } PerlRT;
 
-class Perluno_Any {
+class UNO_Any {
 public:
-	Perluno_Any() {};
-	~Perluno_Any() {};
-	Perluno_XAny getAny();
+	UNO_Any() {};
+	~UNO_Any() {};
+	UNO_XAny getAny();
 
-	Perluno_XInvocation2 xinvoke;
+	UNO_XInvocation2 xinvoke;
 
 protected:
-	Perluno_XAny pany;
+	UNO_XAny pany;
 };
 
-class Perluno_Struct : Perluno_Any {
+class UNO_Struct : UNO_Any {
 public:
-	Perluno_Struct();
-	Perluno_Struct(char *stype);
-	Perluno_Struct(Perluno_XAny tinterface);
-	~Perluno_Struct();
+	UNO_Struct();
+	UNO_Struct(char *stype);
+	UNO_Struct(UNO_XAny tinterface);
+	~UNO_Struct();
 
 	void set(char *mname, SV *value);
 	SV *get(char *mname);
@@ -162,51 +161,63 @@ private:
 	char *TypeString;
 };
 
-class Perluno_Interface : Perluno_Any {
+class UNO_Interface : UNO_Any {
 public:
-	Perluno_Interface();
-	Perluno_Interface(Perluno_XAny targetInterface);
-	~Perluno_Interface() {};
+	UNO_Interface();
+	UNO_Interface(UNO_XAny targetInterface);
+	~UNO_Interface() {};
 
-	SV * invoke(char *method, Perluno_SAny args);
+	SV * invoke(char *method, UNO_SAny args);
 };
 
-class Perluno_Util {
+class UNO_Util {
 public:
-	Perluno_Util() {};
-	~Perluno_Util() {};
+	UNO_Util() {};
+	~UNO_Util() {};
 };
 
-class Perluno {
+class UNO {
 public:
-    Perluno();
-    ~Perluno();
+    UNO();
+    ~UNO();
 
-    Perluno_Interface *createInitialComponentContext();
-    Perluno_Interface *createInitialComponentContext(char *iniFile);
-    Perluno_Struct *createIdlStruct(char *name);
+    UNO_Interface *createInitialComponentContext();
+    UNO_Interface *createInitialComponentContext(char *iniFile);
+    UNO_Struct *createIdlStruct(char *name);
 
 private:
     void createServices();
 
-    Perluno_Interface *ctx;
+    UNO_Interface *ctx;
 };
 
-class Perluno_Boolean : Perluno_Any {
+class UNO_Boolean : UNO_Any {
 public:
-    Perluno_Boolean();
-    Perluno_Boolean(SV *val);
-    ~Perluno_Boolean();
+    UNO_Boolean();
+    UNO_Boolean(SV *val);
+    ~UNO_Boolean();
 
 private:
     sal_Bool bvalue;
 };
 
-// Function Prototype
-Perluno_SAny AVToSAny(AV *av);
-Perluno_XAny HVToStruct(HV *hv);
-Perluno_XAny SVToAny(SV *svp);
-SV *AnyToSV(Perluno_XAny a);
-AV *SAnyToAV(Perluno_SAny sa);
+class UNO_Int32 : UNO_Any {
+public:
+    UNO_Int32();
+    UNO_Int32(SV *val);
+    ~UNO_Int32();
 
-#endif
+private:
+    sal_Int32 ivalue;
+};
+
+// Function Prototype
+UNO_SAny AVToSAny(AV *av);
+UNO_XAny HVToStruct(HV *hv);
+UNO_XAny SVToAny(SV *svp);
+SV *AnyToSV(UNO_XAny a);
+AV *SAnyToAV(UNO_SAny sa);
+SV *AnyToSV(UNO_XAny a);
+AV *SAnyToAV(UNO_SAny sa);
+
+#endif /* _PERLUNO_H_ */

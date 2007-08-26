@@ -1,14 +1,15 @@
 BEGIN { $| = 1; print "1..1\n"; }
 END { print "not ok 1\n" unless $loaded; }
-use Perluno;
+use OpenOffice::UNO;
 
-$pu = new Perluno();
+$pu = new OpenOffice::UNO();
 
 use Cwd;
 my $dir = getcwd;
-$cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
 
-$sm = $cu->getServiceManager();
+print STDERR "04\n";
+my $sm = $cu->getServiceManager();
 
 $loaded = 1;
 

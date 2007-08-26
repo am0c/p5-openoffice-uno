@@ -1,21 +1,27 @@
-UNO version 0.03
-====================
+package OpenOffice::UNO;
 
-INSTALLATION
+=head1 NAME
 
-To install this module type the following:
+OpenOffice::UNO - interface to OpenOffice's UNO runtime
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+=head1 SYNOPSIS
 
-DEPENDENCIES
-1) OpenOffice.org (tested on v1.1RC2)
-2) Test > 07.t requires OpenOffice.org running as a server, listening on port 8100:
-soffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+=cut
 
-COPYRIGHT AND LICENCE
+require Exporter; *import = \&Exporter::import;
+require DynaLoader;
+
+@ISA = qw(DynaLoader);
+$VERSION = '0.03';
+@EXPORT = qw( createComponentContext );
+
+bootstrap OpenOffice::UNO;
+
+=head1 AUTHOR
+
+Bustamam Harun <bustamam@gmail.com>.
+
+=head1 LICENSE
 
  *  The Contents of this file are made available subject to the terms of
  *  either of the following licenses
@@ -65,4 +71,8 @@ COPYRIGHT AND LICENCE
  *
  *   All Rights Reserved.
  *
- *   Contributor(s): Bustamam Harun
+ *   Contributor(s): Bustamam Harun, Mattia Barbon
+
+=cut
+
+1;

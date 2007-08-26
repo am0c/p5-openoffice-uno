@@ -1,44 +1,42 @@
 BEGIN { $| = 1; print "1..1\n"; }
 END {print "not ok 1\n" unless $loaded;}
-use Perluno;
+use OpenOffice::UNO;
 
-$pu = new Perluno();
+my $pu = new OpenOffice::UNO();
 
 use Cwd;
 my $dir = getcwd;
-$cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
-$sm = $cu->getServiceManager();
+my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $sm = $cu->getServiceManager();
 
-$resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
+my $resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
 
-$smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+my $smgr = $resolver->resolve("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
 
-$rc = $smgr->getPropertyValue("DefaultContext");
+my $rc = $smgr->getPropertyValue("DefaultContext");
 
-$dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
+my $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
 @args = ();
 
-$sdoc = $dt->loadComponentFromURL("private:factory/swriter", "_blank", 0, \@args);
+my $sdoc = $dt->loadComponentFromURL("private:factory/swriter", "_blank", 0, \@args);
 
-$oText = $sdoc->getText();
+my $oText = $sdoc->getText();
 
-$oCursor = $oText->createTextCursor();
+my $oCursor = $oText->createTextCursor();
 
-$table = $sdoc->createInstance("com.sun.star.text.TextTable");
+my $table = $sdoc->createInstance("com.sun.star.text.TextTable");
 
 $table->initialize(4, 4);
 $oText->insertTextContent($oCursor, $table, 0);
 
-$rows = $table->getRows();
+my $rows = $table->getRows();
 
-$table->setPropertyValue("BackTransparent", new Perluno::Boolean(FALSE));
-$table->setPropertyValue("BackColor", 13421823 );
-
+$table->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(FALSE));
+$table->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(13421823) );
 $row = $rows->getByIndex(0);
-$row->setPropertyValue("BackTransparent", new Perluno::Boolean(0));
-$row->setPropertyValue("BackColor", 6710932 );
-
+$row->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(0));
+$row->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(6710932) );
 $textColor = 16777215;
 
 &insertTextIntoCell($table, "A1", "FirstColumn", $textColor);
@@ -68,13 +66,13 @@ $loaded = 1;
 print "ok 1\n";
 
 sub insertTextIntoCell {
-    local($table) = $_[0];
+    local($tabl) = $_[0];
     local($cellName) = $_[1];
     local($text) = $_[2];
     local($color) = $_[3];
 
-    $tableText = $table->getCellByName( $cellName );
+    $tableText = $tabl->getCellByName( $cellName );
     $cursor = $tableText->createTextCursor();
-    $cursor->setPropertyValue( "CharColor", $color );
+    $cursor->setPropertyValue( "CharColor", new OpenOffice::UNO::Int32($color) );
     $tableText->setString( $text );
 }
