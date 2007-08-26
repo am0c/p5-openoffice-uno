@@ -68,6 +68,21 @@ use File::Basename;
 use Config;
 use Cwd;
 
+unless ($ENV{'OO_SDK_HOME'}) {
+    print STDERR <<EOT;
+
+**************************************************
+
+The environment variable OO_SDK_HOME is not set,
+please set up the OpenOffice.org SDK enviornemnt
+by using the setsdkenv_unix.sh script or similar.
+
+**************************************************
+
+EOT
+    exit 1;
+}
+
 $sdk_dir = $ENV{'OO_SDK_HOME'};
 $cc = $ENV{'CXX'} || $Config{'cc'};
 $ld = $ENV{'CXX'} || $Config{'ld'};
