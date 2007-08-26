@@ -6,6 +6,42 @@ OpenOffice::UNO - interface to OpenOffice's UNO runtime
 
 =head1 SYNOPSIS
 
+  # Launch OpenOffice.org as a server
+  $ ooffice \
+      "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+
+  use OpenOffice::UNO;
+
+  # connect to the OpenOffice.org server
+  $uno = OpenOffice::UNO->new;
+  $cxt = $uno->createInitialComponentContext;
+  $sm  = $cxt->getServiceManager;
+  $resolver = $sm->createInstanceWithContext
+                  ("com.sun.star.bridge.UnoUrlResolver", $cxt);
+  $rsm = $resolver->resolve
+      ("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
+
+  # get an instance of the Desktop service
+  $rc = $rsm->getPropertyValue("DefaultContext");
+  $desktop = $rsm->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
+
+  # create a name/value pair to be used in opening the document
+  $pv = $uno->createIdlStruct("com.sun.star.beans.PropertyValue");
+  $pv->Name("Hidden");
+  $pv->Value(OpenOffice::UNO::Boolean->new(0));
+
+  # open a document
+  $sdoc = $desktop->loadComponentFromURL("file:///home/jrandom/test1.sxw",
+                                         "_blank", 0, [$pv]);
+
+  # close the document
+  $sdoc->dispose();
+
+=head1 DESCRIPTION
+
+This is a straight bridge to the OpenOffice.org API, so the definitve
+reference is in the OpenOffice.org SDK.
+
 =cut
 
 require Exporter; *import = \&Exporter::import;
@@ -19,7 +55,9 @@ bootstrap OpenOffice::UNO;
 
 =head1 AUTHOR
 
-Bustamam Harun <bustamam@gmail.com>.
+Author: Bustamam Harun <bustamam@gmail.com>.
+
+Maintainer: Mattia Barbon <mbarbon@cpan.org>
 
 =head1 LICENSE
 
