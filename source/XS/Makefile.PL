@@ -77,7 +77,7 @@ if( $^O eq 'MSWin32' ) {
     $uno_def   = '';
 } else {
     @config = split '-', qx[$sdk_dir/config.guess];
-    $cc = $ld = $ENV{'CXX'} || 'g++',
+    $cc = $ld = $ENV{'CXX'} || 'g++';
     if( $config[2] eq 'linux' ) {
         $sdk_platf = 'linux';
         $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DLINUX -DUNX';
@@ -92,7 +92,7 @@ if( $^O eq 'MSWin32' ) {
             $sdk_platf = 'solintel';
             $uno_def   = '-DUNX -DSOLARIS -DX86 -DCPPU_ENV=sunpro5';
         }
-        $cc = $ld = $ENV{'CXX'} || 'CC',
+        $cc = $ld = $ENV{'CXX'} || 'CC';
     } else {
         die "Please add a case for your sdk platform: ", join '-', @config;
     }
