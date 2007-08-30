@@ -573,7 +573,6 @@ SAnyToAV(UNO_SAny sa) {
 
 SV *
 AnyToSV(UNO_XAny a) {
-    SV *svp;
     SV *ret;
 
     ret = Nullsv;
@@ -586,15 +585,14 @@ AnyToSV(UNO_XAny a) {
 
 	case typelib_TypeClass_CHAR: {
 	    sal_Unicode c = *(sal_Unicode*)a.getValue();
-	    ret = SvRV(newSViv(c));
+	    ret = newSViv(c);
 	    break;
 	}
 
 	case typelib_TypeClass_BOOLEAN: {
 	    sal_Bool b;
 	    a >>= b;
-	    if (b) ret = SvRV(newSViv(1));
-	    else ret = SvRV(newSViv(0));
+	    ret = b ? &PL_sv_yes : &PL_sv_no;
 	    break;
 	}
 
@@ -604,42 +602,42 @@ AnyToSV(UNO_XAny a) {
 	case typelib_TypeClass_LONG: {
 	    long l;
 	    a >>= l;
-	    ret = SvRV(newSViv(l));
+	    ret = newSViv(l);
 	    break;
 	}
 
 	case typelib_TypeClass_UNSIGNED_LONG: { 
 	    unsigned long l;
 	    a >>= l;
-	    ret = SvRV(newSViv(l));
+	    ret = newSVuv(l);
 	    break;
 	} 
 
 	case typelib_TypeClass_HYPER: {
 	    sal_Int64 l;
 	    a >>= l;
-	    ret = SvRV(newSViv(l));
+	    ret = newSViv(l);
 	    break;
 	}
 
 	case typelib_TypeClass_UNSIGNED_HYPER: {
 	    sal_uInt64 l;
 	    a >>= l;
-	    ret = SvRV(newSViv(l));
+	    ret = newSVuv(l);
 	    break;
 	}
 
 	case typelib_TypeClass_FLOAT: {
 	    float f;
 	    a >>= f;
-	    ret = SvRV(newSVnv(f));
+	    ret = newSVnv(f);
 	    break;
 	}
 
 	case typelib_TypeClass_DOUBLE: {
 	    double d;
 	    a >>= d;
-	    ret = SvRV( newSVnv(d));
+	    ret = newSVnv(d);
 	    break;
 	}
 
@@ -649,8 +647,8 @@ AnyToSV(UNO_XAny a) {
 
 	    ::rtl::OString o = ::rtl::OUStringToOString(tmp_ostr, RTL_TEXTENCODING_UTF8);
 
-	    svp = sv_2mortal(newSVpv(o.getStr(), o.getLength()));
-	    SvUTF8_on(svp);
+	    ret = newSVpvn(o.getStr(), o.getLength());
+	    SvUTF8_on(ret);
 	    break;
 	}
 
