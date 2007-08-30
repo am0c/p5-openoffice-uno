@@ -5,15 +5,18 @@ INSTALLATION
 
 To install this module type the following:
 
+   # use the correct path for setsdkenv_unix.sh
+   . /usr/lib/openoffice/sdk/setsdkenv_unix.sh
+
    perl Makefile.PL
    make
    make test
    make install
 
 DEPENDENCIES
-1) OpenOffice.org (tested on v1.1RC2)
+1) OpenOffice.org (tested on v2.0 and v2.2)
 2) Test > 07.t requires OpenOffice.org running as a server, listening on port 8100:
-soffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+ooffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
 
 COPYRIGHT AND LICENCE
 
@@ -65,4 +68,4 @@ COPYRIGHT AND LICENCE
  *
  *   All Rights Reserved.
  *
- *   Contributor(s): Bustamam Harun
+ *   Contributor(s): Bustamam Harun, Mattia Barbon

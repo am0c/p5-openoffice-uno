@@ -8,7 +8,6 @@ use Cwd;
 my $dir = getcwd;
 my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
 
-print STDERR "04\n";
 my $sm = $cu->getServiceManager();
 
 $loaded = 1;
