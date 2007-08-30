@@ -884,7 +884,7 @@ CODE:
     if ( items == 2 ) {	// If "set"
 	THIS->set(mname, ST(1));
     } else {	// If "get"
-	RETVAL = THIS->get(mname);
+	ret = THIS->get(mname);
     }
 
     RETVAL = ret;
