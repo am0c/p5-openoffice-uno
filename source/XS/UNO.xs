@@ -60,6 +60,7 @@
  ************************************************************************/
 
 #include "UNO.h"
+#include "ppport.h"
 
 // UNO Runtime Instance
 static PerlRT UNOInstance;
