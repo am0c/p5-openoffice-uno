@@ -53,6 +53,17 @@ $VERSION = '0.03';
 
 bootstrap OpenOffice::UNO;
 
+package OpenOffice::UNO::Exception;
+
+@ISA = qw(OpenOffice::UNO::Struct);
+
+# warning about inherited AUTOLOAD for non-method 'Message'
+*AUTOLOAD = \&OpenOffice::UNO::Struct::AUTOLOAD;
+
+use overload
+    '""'     => \&Message,
+    ;
+
 =head1 AUTHOR
 
 Author: Bustamam Harun <bustamam@gmail.com>.

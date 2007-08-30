@@ -65,6 +65,15 @@
 // UNO Runtime Instance
 static PerlRT UNOInstance;
 
+// helper function
+static void
+UNOCroak(pTHX_ ::com::sun::star::uno::Exception& e ) {
+    SV *exc = AnyToSV(makeAny(e));
+    SV *errsv = get_sv("@", TRUE);
+    sv_replace(errsv, exc);
+    croak(Nullch);
+}
+
 UNO::UNO() {
     ctx = NULL;
 }
@@ -270,7 +279,11 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
     UNO_SShort oidx;
     UNO_XAny ret_val;
 
-    ret_val = xinvoke->invoke(mstr, args, oidx, oargs);
+    try {
+	ret_val = xinvoke->invoke(mstr, args, oidx, oargs);
+    } catch ( ::com::sun::star::uno::Exception& e ) {
+	UNOCroak(aTHX_ e);
+    }
 
     SV *retval = Nullsv;
     if ( oargs.getLength() > 0 ) {
@@ -660,7 +673,10 @@ AnyToSV(UNO_XAny a) {
 	}
 
 	case typelib_TypeClass_EXCEPTION: {
-	    croak("Any2SV: EXCEPTION type not supported yet");
+	    UNO_Struct *tret = new UNO_Struct(a);
+	    SV *mret = sv_newmortal();
+	    ret = newRV_inc(mret);
+	    sv_setref_pv(ret, "OpenOffice::UNO::Exception", (void *)tret);
 	    break;
 	}
 
