@@ -114,8 +114,7 @@ UNO_Struct::UNO_Struct(char *sname) {
     UNO_XAny tstruct;
     UNO_XIdlClass idlclass(UNOInstance.reflection->forName(soname), ::com::sun::star::uno::UNO_QUERY);
     if (! idlclass.is()) {
-	fprintf(stderr, "UNO: failed to create IdlClass\n");
-	return;
+	croak("UNO: failed to create IdlClass");
     }
 
     idlclass->createObject(tstruct);
@@ -123,15 +122,13 @@ UNO_Struct::UNO_Struct(char *sname) {
     args[0] <<= tstruct;
     tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "UNO: Proxy creation failed\n");
-        return;
+	croak("UNO: Proxy creation failed");
     }
 
     xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
-        return;
+	croak("UNO: XInvocation2 failed to be created");
     }
 
     pany = tstruct;
@@ -145,15 +142,13 @@ UNO_Struct::UNO_Struct(UNO_XAny tany) {
     args[0] <<= tany;
     tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "UNO: Proxy creation failed\n");
-        return;
+	croak("UNO: Proxy creation failed");
     }
 
     xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
-        return;
+	croak("UNO: XInvocation2 failed to be created");
     }
 
     pany = tany;
@@ -167,8 +162,7 @@ UNO_Struct::set(char *mname, SV *value) {
     UNO_XAny aval;
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
-	return;
+	croak("UNO: Invalid XInvocation2 ref");
     }
 
     aval = SVToAny(value);
@@ -177,8 +171,7 @@ UNO_Struct::set(char *mname, SV *value) {
     if ( xinvoke->hasProperty(membername) ) {
 	xinvoke->setValue( membername, aval );
     } else {
-	fprintf(stderr, "Member name: \"%s\" does not exists\n", mname);
-	return;
+	croak("Member name: \"%s\" does not exists", mname);
     }
 }
 
@@ -187,16 +180,14 @@ UNO_Struct::get(char *mname) {
     UNO_XAny aval;
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
-	return (SV *)Nullsv;
+	croak("UNO: Invalid XInvocation2 ref");
     }
 
     ::rtl::OUString membername = ::rtl::OUString::createFromAscii(mname);
     if ( xinvoke->hasProperty(membername) ) {
 	aval = xinvoke->getValue( membername );
     } else {
-	fprintf(stderr, "Member name: \"%s\" does not exists\n", mname);
-	return (SV *)Nullsv;
+	croak("Member name: \"%s\" does not exists", mname);
     }
     return AnyToSV(aval);
 }
@@ -244,22 +235,19 @@ UNO_Interface::UNO_Interface(UNO_XAny thisif) {
     UNO_XInterface cif;
     thisif >>= cif;
     if ( ! cif.is() ) {
-	fprintf(stderr, "UNO: invalid interface ref\n");
-        return;
+	croak("UNO: invalid interface ref");
     }
 
     args[0] <<= thisif;
     tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
-	fprintf(stderr, "UNO: Proxy creation failed\n");
-        return;
+	croak("UNO: Proxy creation failed");
     }
 
     xinvoke = UNO_XInvocation2(tif, ::com::sun::star::uno::UNO_QUERY);
 
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: XInvocation2 failed to be created\n");
-        return;
+	croak("UNO: XInvocation2 failed to be created");
     }
 
     pany = thisif;
@@ -271,13 +259,11 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
 
     ::rtl::OUString mstr = ::rtl::OUString::createFromAscii(method);
     if ( ! xinvoke.is() ) {
-	fprintf(stderr, "UNO: Invalid XInvocation2 ref\n");
-	return (SV *)Nullsv;
+	croak("UNO: Invalid XInvocation2 ref");
     }
 
     if ( ! xinvoke->hasMethod(mstr) ) {
-	fprintf(stderr, "UNO: Method: \"%s\" is NOT defined\n", method);
-	return (SV *)Nullsv;
+	croak("UNO: Method: \"%s\" is NOT defined", method);
     }
 
     UNO_SAny oargs;
@@ -424,7 +410,7 @@ SVToAny(SV *svp) {
 				if( mh.is() ) {
 				    a = mh->getMaterial();
 				} else {
-				    fprintf(stderr, "Error getting Material\n");
+				    croak("Error getting Material");
 				}
 				break;
 			    }
@@ -445,7 +431,7 @@ SVToAny(SV *svp) {
 			    }
 
 			    default: {
-				fprintf(stderr, "Unsupported ref: %d\n", tany.getValueTypeClass());
+				croak("Unsupported ref: %d", tany.getValueTypeClass());
 				break;
 			    }
 			}
@@ -466,7 +452,7 @@ SVToAny(SV *svp) {
 				if( mh.is() ) {
 				    a = mh->getMaterial();
 				} else {
-				    fprintf(stderr, "Error getting Material\n");
+				    croak("Error getting Material");
 				}
 				break;
 			    }
@@ -487,7 +473,7 @@ SVToAny(SV *svp) {
 			    }
 
 			    default: {
-				fprintf(stderr, "Unsupported mg ref: %d\n", tany.getValueTypeClass());
+				croak("Unsupported mg ref: %d", tany.getValueTypeClass());
 				break;
 			    }
 			}
@@ -503,7 +489,7 @@ SVToAny(SV *svp) {
 		    }
 
 		    default:
-			fprintf(stderr, "SVToAny: Unsupported reference type: %d\n", SvTYPE(SvRV(svp)));
+			croak("SVToAny: Unsupported reference type: %d", SvTYPE(SvRV(svp)));
 			break;
 		}
 	    }
@@ -552,7 +538,7 @@ SVToAny(SV *svp) {
 		break;
 
 	default:
-	    fprintf(stderr, "SVToAny: UNKNOWN Perl type\n");
+	    croak("SVToAny: UNKNOWN Perl type");
 	    break;
     }
 
@@ -664,20 +650,17 @@ AnyToSV(UNO_XAny a) {
 	}
 
 	case typelib_TypeClass_ANY: {
-	    fprintf(stderr, "Any2SV: ANY type not supported yet\n");
-	    ret = Nullsv;
+	    croak("Any2SV: ANY type not supported yet");
 	    break;
 	}
 
 	case typelib_TypeClass_ENUM: {
-	    fprintf(stderr, "Any2SV: ENUM type not supported yet\n");
-	    ret = Nullsv;
+	    croak("Any2SV: ENUM type not supported yet");
 	    break;
 	}
 
 	case typelib_TypeClass_EXCEPTION: {
-	    fprintf(stderr, "Any2SV: EXCEPTION type not supported yet\n");
-	    ret = Nullsv;
+	    croak("Any2SV: EXCEPTION type not supported yet");
 	    break;
 	}
 
@@ -705,7 +688,7 @@ AnyToSV(UNO_XAny a) {
 	}
 
 	default: {
-	    fprintf(stderr, "Any2SV: Error Unknown Any type\n");
+	    croak("Any2SV: Error Unknown Any type");
 	    ret = Nullsv;
 	    break;
 	}
