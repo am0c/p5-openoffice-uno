@@ -71,7 +71,7 @@ TARGET=perluno
 
 # --- Files --------------------------------------------------------
 
-TARFILE_NAME=perluno-0.02
+TARFILE_NAME=perluno-0.03
 TARFILE_ROOTDIR=perluno
 
 .IF "$(GUI)"=="UNX"
