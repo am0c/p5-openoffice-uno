@@ -164,7 +164,7 @@ WriteMakefile (
 			       'Mattia Barbon <mbarbon@cpan.org>' ),
     'VERSION_FROM'=> 'UNO.pm',
     'ABSTRACT_FROM'=> 'UNO.pm',
-    'LICENSE'	=> 'lgpl',
+    'LICENSE'	=> 'open_source',
 );
 
 exit(0);
