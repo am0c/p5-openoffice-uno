@@ -1,6 +1,6 @@
 Revision history for Perl extension OpenOffice::UNO.
 
-0.03
+0.03  Sat Sep  1 19:06:08 CEST 2007
 	- improve the build system to work more reliably out of the box
 	- convert UNO exceptions to Perl exceptions
 	- rename the module from Perluno to OpenOffice::UNO
