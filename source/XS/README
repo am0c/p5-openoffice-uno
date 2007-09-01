@@ -14,9 +14,16 @@ To install this module type the following:
    make install
 
 DEPENDENCIES
+
 1) OpenOffice.org (tested on v2.0 and v2.2)
-2) Test > 07.t requires OpenOffice.org running as a server, listening on port 8100:
-ooffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+2) Tests > 07.t requires OpenOffice.org running as a server, listening
+   on port 8100:
+
+   ooffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+
+SITE
+
+http://perluno.sourceforge.net/
 
 COPYRIGHT AND LICENCE
 

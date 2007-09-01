@@ -42,6 +42,8 @@ OpenOffice::UNO - interface to OpenOffice's UNO runtime
 This is a straight bridge to the OpenOffice.org API, so the definitve
 reference is in the OpenOffice.org SDK.
 
+The homepage for OpenOffice::UNO is http://perluno.sourceforge.net/
+
 =cut
 
 require Exporter; *import = \&Exporter::import;
