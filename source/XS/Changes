@@ -1,5 +1,8 @@
 Revision history for Perl extension OpenOffice::UNO.
 
+0.04  Fri Sep 21 20:09:31 CEST 2007
+	- compile and run under Windows
+
 0.03  Sat Sep  1 19:06:08 CEST 2007
 	- improve the build system to work more reliably out of the box
 	- convert UNO exceptions to Perl exceptions
