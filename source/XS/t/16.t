@@ -1,12 +1,16 @@
-BEGIN { $| = 1; print "1..1\n"; }
-END {print "not ok 1\n" unless $loaded;}
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use lib qw(t/lib);
+use Test::More tests => 1;
+
+use UnoTest;
 use OpenOffice::UNO;
 
 my $pu = new OpenOffice::UNO();
 
-use Cwd;
-my $dir = getcwd;
-my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
+my $cu = get_cu($pu);
 my $sm = $cu->getServiceManager();
 
 my $resolver = $sm->createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", $cu);
@@ -17,7 +21,7 @@ my $rc = $smgr->getPropertyValue("DefaultContext");
 
 my $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-@args = ();
+my @args = ();
 
 my $sdoc = $dt->loadComponentFromURL("private:factory/swriter", "_blank", 0, \@args);
 
@@ -32,12 +36,12 @@ $oText->insertTextContent($oCursor, $table, 0);
 
 my $rows = $table->getRows();
 
-$table->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(FALSE));
+$table->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(0));
 $table->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(13421823) );
-$row = $rows->getByIndex(0);
+my $row = $rows->getByIndex(0);
 $row->setPropertyValue("BackTransparent", new OpenOffice::UNO::Boolean(0));
 $row->setPropertyValue("BackColor", new OpenOffice::UNO::Int32(6710932) );
-$textColor = 16777215;
+my $textColor = 16777215;
 
 &insertTextIntoCell($table, "A1", "FirstColumn", $textColor);
 &insertTextIntoCell($table, "B1", "SecondColumn", $textColor);
@@ -61,18 +65,13 @@ $table->getCellByName("D4")->setFormula("sum <A4:C4>");
 
 $sdoc->dispose();
 
-$loaded = 1;
-
-print "ok 1\n";
+ok( 1, 'Got there' );
 
 sub insertTextIntoCell {
-    local($tabl) = $_[0];
-    local($cellName) = $_[1];
-    local($text) = $_[2];
-    local($color) = $_[3];
+    my ($tabl, $cellName, $text, $color) = @_;
 
-    $tableText = $tabl->getCellByName( $cellName );
-    $cursor = $tableText->createTextCursor();
+    my $tableText = $tabl->getCellByName( $cellName );
+    my $cursor = $tableText->createTextCursor();
     $cursor->setPropertyValue( "CharColor", new OpenOffice::UNO::Int32($color) );
     $tableText->setString( $text );
 }

@@ -1,22 +1,22 @@
-BEGIN { $| = 1; print "1..2\n"; }
-END { print "not ok 1\n" unless $loaded; }
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use lib qw(t/lib);
+use Test::More tests => 1;
+
+use UnoTest;
 use OpenOffice::UNO;
 
 my $pu = new OpenOffice::UNO();
 
-use Cwd;
-my $dir = getcwd;
-my $cu = $pu->createInitialComponentContext("file://" . $dir . "/perluno");
-
+my $cu = get_cu($pu);
 my $sm = $cu->getServiceManager();
 
 eval {
     $sm->testMethod();
 };
 if( my $e = $@ ) {
-    print "ok 1\n";
+    ok( 1, 'Got there' );
 }
 
-$loaded = 1;
-
-print "ok 2\n";

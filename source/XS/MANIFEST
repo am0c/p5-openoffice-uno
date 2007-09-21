@@ -26,3 +26,4 @@ t/13.t
 t/14.t
 t/15.t
 t/16.t
+t/lib/UnoTest.pm

@@ -1,9 +1,13 @@
-BEGIN { $| = 1; print "1..1\n"; }
-END {print "not ok 1\n" unless $loaded;}
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use lib qw(t/lib);
+use Test::More tests => 1;
+
+use UnoTest;
 use OpenOffice::UNO;
 
 my $pu = new OpenOffice::UNO();
 
-$loaded = 1;
-print "ok 1\n";
-
+ok( 1, 'Got there' );
