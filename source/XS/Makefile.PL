@@ -87,9 +87,15 @@ $sdk_dir = $ENV{'OO_SDK_HOME'};
 $cc = $ENV{'CXX'} || $Config{'cc'};
 $ld = $ENV{'CXX'} || $Config{'ld'};
 $cc_flags = '';
+$uno_lib = $ENV{'OO_SDK_URE_LIB_DIR'};
+$uno_libpath = "-L$uno_lib";
 if( $^O eq 'MSWin32' ) {
     $sdk_platf = 'windows';
-    $uno_def   = '';
+    $uno_def   = '-DCPPU_ENV=msci -DWIN32 -DWNT';
+    $uno_lib   = $sdk_dir . "\\windows\\lib";
+    $uno_libpath = "-libpath:$uno_lib";
+    $ld = 'link';
+    $cc_flags = ' /TP /EHsc ';
 } else {
     @config = split '-', qx[$sdk_dir/config.guess];
     $cc = $ld = $ENV{'CXX'} || 'g++';
@@ -112,22 +118,16 @@ if( $^O eq 'MSWin32' ) {
         die "Please add a case for your sdk platform: ", join '-', @config;
     }
 }
-$uno_lib = "-L$ENV{'OO_SDK_URE_LIB_DIR'}";
-$uno_inc = "-I$ENV{'OO_SDK_HOME'}";
 
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
-@LPath = split(" ", $uno_lib);
-
-for ($i=0; $i <= $#LPath; $i++) {
-    $LPath[$i] =~ s/-L//;
-}
+@LPath = ($uno_lib);
 
 $LibsOK = 0;
 %FLib = ();
 %SLib = ();
 # Check all required libs
 for $lib (@ReqLibs) {
-    for $lpath (@LPath) { 
+    for $lpath (@LPath) {
 	$flib = &getReqLib($lpath, $lib);
 	if ( $flib ne "" ) {
 	    $LibsOK = 1;
@@ -151,10 +151,10 @@ WriteMakefile (
     'CC'	=> $cc,
     'LD'	=> $ld,
     'CCFLAGS'	=> $uno_def . " " . $cc_flags,
-    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'} . ' ' . $Config{'lddlflags'} . ' ',
-    'LDDLFLAGS'	=> $uno_lib . ' ' . $Config{'lddlflags'}  . ' ',
-    'LIBS'	=> [ $uno_lib . ' ' . $LinkLibs ],
-    'INC'	=> $uno_inc . " -Iblib/uno -I$sdk_dir/include ",
+#    'CCCDLFLAGS' => ' ' . $Config{'cccdlflags'},
+    'LDDLFLAGS'	=> $uno_libpath . ' ' . $Config{'lddlflags'}  . ' ',
+    'LIBS'	=> [ $uno_libpath . ' ' . $LinkLibs ],
+    'INC'	=> " -Iblib/uno -I$sdk_dir/include ",
     'depend'	=> { '$(OBJECT)' => 'blib/uno/headers perluno',
 		     },
     'clean'	=> { 'FILES'     => 'test2.sxw perluno',
@@ -173,8 +173,9 @@ exit(0);
 sub MY::makefile { '' }
 
 sub MY::postamble {
+    my $psep = $^O eq 'MSWin32' ? '\\' : '/';
     my $cwd = cwd();
-    my $out = 'blib/uno';
+    my $out = "blib${psep}uno";
     my $abs_out = File::Spec->rel2abs( $out );
     my $interfaces = join ' ', map '-T' . $_,
       qw(com.sun.star.lang.IllegalArgumentException
@@ -213,7 +214,7 @@ sub MY::postamble {
 #	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
 
 $out/headers : $out
-	$sdk_dir/$sdk_platf/bin/cppumaker -Gc -BUCR -O$abs_out $interfaces $ENV{'OO_SDK_URE_BIN_DIR'}/types.rdb
+	$sdk_dir$psep$sdk_platf${psep}bin${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$ENV{'OO_SDK_URE_BIN_DIR'}${psep}types.rdb"
 	\$(TOUCH) $out/headers
 
 uno_stuff: $out/headers perluno
@@ -241,15 +242,28 @@ sub getReqLib {
 }
 
 sub getlib {
+    return if defined($FLib{$clib});
     if ( ($File::Find::name =~ m/${clib}/) ) {
 	($libname, undef) = fileparse($File::Find::name);
-	if ( ($libname =~ m/^lib/) && ($libname =~ m/\.so$/) ) {
-	    if ( ! defined($FLib{$clib}) ) {
-		$FLib{$clib} = $libname;
-		$SLib{$clib} = $libname;
-		$SLib{$clib} =~ s/^lib//;
-		$SLib{$clib} =~ s/\.so$//;
-	    }
-	}
+        if ( $^O eq 'MSWin32' ) {
+            getlib_win32();
+        } else {
+            getlib_unix();
+        }
     }
+}
+
+sub getlib_win32 {
+    return unless ($libname =~ m/${clib}/) && ($libname =~ m/\.lib$/);
+    $FLib{$clib} = $libname;
+    $SLib{$clib} = $libname;
+    $SLib{$clib} =~ s/\.lib$//;
+}
+
+sub getlib_unix {
+    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.so$/);
+    $FLib{$clib} = $libname;
+    $SLib{$clib} = $libname;
+    $SLib{$clib} =~ s/^lib//;
+    $SLib{$clib} =~ s/\.so$//;
 }

@@ -62,6 +62,8 @@
 #include "UNO.h"
 #include "ppport.h"
 
+#undef realloc
+
 // UNO Runtime Instance
 static PerlRT UNOInstance;
 
