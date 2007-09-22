@@ -1,5 +1,7 @@
 Revision history for Perl extension OpenOffice::UNO.
 
+0.05
+
 0.04  Fri Sep 21 20:09:31 CEST 2007
 	- compile and run under Windows
 
