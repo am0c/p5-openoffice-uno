@@ -514,7 +514,7 @@ SVToAny(SV *svp) {
 	case SVt_PV: {
 	    // Extract String
 	    char *tstr = SvPVX(svp);
-	    ::rtl::OUString ostr = ::rtl::OUString::createFromAscii(tstr);
+	    ::rtl::OUString ostr = ::rtl::OUString(tstr, SvCUR(svp), SvUTF8(svp) ? RTL_TEXTENCODING_UTF8 : RTL_TEXTENCODING_ISO_8859_1 );
 	    a <<= ostr;
 	    break;
 	}
