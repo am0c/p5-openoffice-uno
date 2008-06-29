@@ -4,6 +4,7 @@ UNO_Struct *		T_STRUCTREF
 UNO_Any *		T_ANYREF
 UNO_Boolean *		T_BOOLREF
 UNO_Int32 *		T_INT32REF
+UNO_Int64 *		T_INT64REF
 
 #############################################################################
 INPUT
@@ -49,6 +50,13 @@ T_INT32REF
     } else
 	Perl_croak(aTHX_ \"$var is not a reference\")
 
+T_INT64REF
+    if (SvROK($arg)) {
+	IV tmp = SvIV((SV*)SvRV($arg));
+	$var = INT2PTR($type,tmp);
+    } else
+	Perl_croak(aTHX_ \"$var is not a reference\")
+
 #############################################################################
 OUTPUT
 T_UNOREF
@@ -69,3 +77,5 @@ T_BOOLREF
 T_INT32REF
     sv_setref_pv($arg, \"OpenOffice::UNO::Int32\", (void*)$var);
 
+T_INT64REF
+    sv_setref_pv($arg, \"OpenOffice::UNO::Int64\", (void*)$var);

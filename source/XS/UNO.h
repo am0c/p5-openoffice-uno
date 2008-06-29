@@ -211,6 +211,16 @@ private:
     sal_Int32 ivalue;
 };
 
+class UNO_Int64 : UNO_Any {
+public:
+    UNO_Int64();
+    UNO_Int64(SV *val);
+    ~UNO_Int64();
+
+private:
+    sal_Int64 ivalue;
+};
+
 // Function Prototype
 UNO_SAny AVToSAny(AV *av);
 UNO_XAny HVToStruct(HV *hv);

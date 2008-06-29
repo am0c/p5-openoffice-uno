@@ -445,6 +445,11 @@ SVToAny(SV *svp) {
 				break;
 			    }
 
+			    case typelib_TypeClass_HYPER: {
+				a = tany;
+				break;
+			    }
+
 			    default: {
 				croak("Unsupported ref: %d", tany.getValueTypeClass());
 				break;
@@ -483,6 +488,11 @@ SVToAny(SV *svp) {
 			    }
 
 			    case typelib_TypeClass_LONG: {
+				a = tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_HYPER: {
 				a = tany;
 				break;
 			    }
@@ -728,7 +738,7 @@ UNO_Boolean::~UNO_Boolean() {
 }
 
 UNO_Int32::UNO_Int32() {
-    sal_Int32 i = sal_False;
+    sal_Int32 i = 0;
     pany = UNO_XAny(&i, getCppuType(&i));
     ivalue = 0;
 }
@@ -740,6 +750,21 @@ UNO_Int32::UNO_Int32(SV *ival) {
 }
 
 UNO_Int32::~UNO_Int32() {
+}
+
+UNO_Int64::UNO_Int64() {
+    sal_Int64 i = 0;
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = 0;
+}
+
+UNO_Int64::UNO_Int64(SV *ival) {
+    sal_Int64 i = (sal_Int64)SvIV(ival);
+    pany = UNO_XAny(&i, getCppuType(&i));
+    ivalue = i;
+}
+
+UNO_Int64::~UNO_Int64() {
 }
 
 MODULE = OpenOffice::UNO     	PACKAGE = OpenOffice::UNO	PREFIX = UNO_
@@ -922,3 +947,17 @@ CODE:
 OUTPUT:
     RETVAL
 
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Int64	PREFIX = UNO_
+
+UNO_Int64 *
+UNO_Int64::new(...)
+CODE:
+{
+    if ( items == 2 ) {
+        RETVAL = new UNO_Int64(ST(1));
+    } else {
+        RETVAL = new UNO_Int64();
+    }
+}
+OUTPUT:
+    RETVAL
