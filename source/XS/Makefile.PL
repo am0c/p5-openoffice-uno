@@ -80,7 +80,7 @@ by using the setsdkenv_unix.sh script or similar.
 **************************************************
 
 EOT
-    exit 1;
+    exit 0;
 }
 
 $sdk_dir = $ENV{'OO_SDK_HOME'};
