@@ -9,6 +9,7 @@ ppport.h
 typemap
 perluno.tmpl
 test1.sxw
+test2.sxw
 README
 t/01.t
 t/02.t

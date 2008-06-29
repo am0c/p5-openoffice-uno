@@ -138,8 +138,10 @@ typedef struct _PerlRT {
 class UNO_Any {
 public:
 	UNO_Any() {};
+	UNO_Any(char *stype);
 	~UNO_Any() {};
 	UNO_XAny getAny();
+	void assignAny(UNO_XAny any);
 
 	UNO_XInvocation2 xinvoke;
 

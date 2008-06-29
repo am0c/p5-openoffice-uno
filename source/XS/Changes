@@ -3,6 +3,8 @@ Revision history for Perl extension OpenOffice::UNO.
 0.05
 	- correctly handle Unicode when passing data from Perl to UNO
 	  (passing Unicode from UNO to Perl was already OK)
+	- add support for creating values of a specific type
+	  (mostly useful for sequence types).
 
 0.04  Fri Sep 21 20:09:31 CEST 2007
 	- compile and run under Windows

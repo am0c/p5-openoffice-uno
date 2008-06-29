@@ -114,14 +114,9 @@ UNO::createServices() {
 		UNO_XInterface () );
 }
 
-UNO_Struct::UNO_Struct() {
-}
-
-UNO_Struct::UNO_Struct(char *sname) {
+UNO_Any::UNO_Any(char *sname) {
     ::rtl::OUString soname = ::rtl::OUString::createFromAscii(sname);
 
-    UNO_SAny args(1);
-    UNO_XInterface tif;
     UNO_XAny tstruct;
     UNO_XIdlClass idlclass(UNOInstance.reflection->forName(soname), ::com::sun::star::uno::UNO_QUERY);
     if (! idlclass.is()) {
@@ -129,8 +124,17 @@ UNO_Struct::UNO_Struct(char *sname) {
     }
 
     idlclass->createObject(tstruct);
+    pany = tstruct;
+}
 
-    args[0] <<= tstruct;
+UNO_Struct::UNO_Struct() {
+}
+
+UNO_Struct::UNO_Struct(char *sname) : UNO_Any(sname) {
+    UNO_SAny args(1);
+    UNO_XInterface tif;
+
+    args[0] <<= pany;
     tif = UNOInstance.ssf->createInstanceWithArguments(args);
     if ( ! tif.is() ) {
 	croak("UNO: Proxy creation failed");
@@ -142,7 +146,6 @@ UNO_Struct::UNO_Struct(char *sname) {
 	croak("UNO: XInvocation2 failed to be created");
     }
 
-    pany = tstruct;
     TypeString = strdup(sname);
 }
 
@@ -310,6 +313,11 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
     }
 
     return retval;
+}
+
+void
+UNO_Any::assignAny(UNO_XAny any) {
+	pany <<= any;
 }
 
 UNO_XAny
@@ -494,6 +502,11 @@ SVToAny(SV *svp) {
 
 			    case typelib_TypeClass_HYPER: {
 				a = tany;
+				break;
+			    }
+
+			    case typelib_TypeClass_SEQUENCE: {
+				a <<= tany;
 				break;
 			    }
 
@@ -701,7 +714,7 @@ AnyToSV(UNO_XAny a) {
 	case typelib_TypeClass_SEQUENCE: {
 	    UNO_SAny sa;
 	    UNOInstance.typecvt->convertTo(a, ::getCppuType(&sa)) >>= sa;
-	    ret = (SV *)SAnyToAV(sa);
+	    ret = newRV_noinc((SV *)SAnyToAV(sa));
 	    break;
 	}
 
@@ -817,6 +830,29 @@ CODE:
     name = SvPV(ST(1), len);
     UNO_Struct *tret = THIS->createIdlStruct(name);
     RETVAL = tret;
+}
+OUTPUT:
+    RETVAL
+
+MODULE = OpenOffice::UNO	PACKAGE = OpenOffice::UNO::Any	PREFIX = UNO_
+
+UNO_Any *
+UNO_Any::new(type, value)
+    char *type
+    SV *value
+CODE:
+{
+    UNO_Any *any = new UNO_Any(type);
+    UNO_XAny from = SVToAny(value);
+
+    ::com::sun::star::uno::Type t = any->getAny().getValueType();
+    try {
+        any->assignAny(UNOInstance.typecvt->convertTo(from, t));
+    } catch(::com::sun::star::uno::Exception& e) {
+        UNOCroak(aTHX_ e);
+    }
+
+    RETVAL = any;
 }
 OUTPUT:
     RETVAL
