@@ -286,6 +286,10 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
 
     try {
 	ret_val = xinvoke->invoke(mstr, args, oidx, oargs);
+    } catch ( ::com::sun::star::reflection::InvocationTargetException& e ) {
+	::com::sun::star::uno::Exception inner;
+	e.TargetException >>= inner;
+	UNOCroak(aTHX_ inner);
     } catch ( ::com::sun::star::uno::Exception& e ) {
 	UNOCroak(aTHX_ e);
     }
