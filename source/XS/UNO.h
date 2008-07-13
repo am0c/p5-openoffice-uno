@@ -76,6 +76,7 @@
 #include <com/sun/star/script/XTypeConverter.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <com/sun/star/reflection/XIdlClass.hpp>
+#include <com/sun/star/lang/WrappedTargetRuntimeException.hpp>
 #include <com/sun/star/uno/RuntimeException.hpp>
 #include <com/sun/star/beans/XIntrospection.hpp>
 #include <com/sun/star/script/XInvocation2.hpp>

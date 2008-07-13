@@ -290,6 +290,10 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
 	::com::sun::star::uno::Exception inner;
 	e.TargetException >>= inner;
 	UNOCroak(aTHX_ inner);
+    } catch ( ::com::sun::star::lang::WrappedTargetRuntimeException& e ) {
+	::com::sun::star::uno::Exception inner;
+	e.TargetException >>= inner;
+	UNOCroak(aTHX_ inner);       
     } catch ( ::com::sun::star::uno::Exception& e ) {
 	UNOCroak(aTHX_ e);
     }

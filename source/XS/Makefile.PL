@@ -204,6 +204,7 @@ sub MY::postamble {
          com.sun.star.script.XTypeConverter
          com.sun.star.beans.XIntrospection
          com.sun.star.script.XInvocation2
+         com.sun.star.lang.WrappedTargetRuntimeException
          );
 
     return <<EOT;
