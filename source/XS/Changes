@@ -1,8 +1,8 @@
 Revision history for Perl extension OpenOffice::UNO.
 
 0.06
-	- when method invocation gives an error, throw the original
-	  exception, not the wrapper object.
+	- when method invocation gives an error, report to Perl the original
+	  exception, not the wrapper exception.
 
 0.05  Sun Jun 29 17:19:32 CEST 2008
 	- correctly handle Unicode when passing data from Perl to UNO
