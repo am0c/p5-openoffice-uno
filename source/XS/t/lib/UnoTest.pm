@@ -4,10 +4,12 @@ use strict;
 use warnings;
 use Exporter; *import = \&Exporter::import;
 
-our @EXPORT = qw(get_file get_cu);
+our @EXPORT = qw(get_file get_cu get_service_manager);
 
 use OpenOffice::UNO;
 use Cwd;
+
+our $SMGR_URL = "uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager";
 
 sub get_cu {
     my ($pu) = @_;
@@ -30,6 +32,20 @@ sub get_file {
     } else {
         return 'file://'  . $dir . '/' . $file;
     }
+}
+
+sub get_service_manager {
+    my $pu = new OpenOffice::UNO();
+
+    my $cu = get_cu($pu);
+    my $sm = $cu->getServiceManager();
+
+    my $resolver = $sm->createInstanceWithContext
+                       ("com.sun.star.bridge.UnoUrlResolver", $cu);
+
+    my $smgr = $resolver->resolve($SMGR_URL);
+
+    return ($pu, $smgr);
 }
 
 1;
