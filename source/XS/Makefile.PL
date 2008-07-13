@@ -157,7 +157,7 @@ WriteMakefile (
     'INC'	=> " -Iblib/uno -I$sdk_dir/include ",
     'depend'	=> { '$(OBJECT)' => 'blib/uno/headers perluno',
 		     },
-    'clean'	=> { 'FILES'     => 'test2.sxw perluno',
+    'clean'	=> { 'FILES'     => 'test2_export.pdf test2_save.sxw perluno',
 		     },
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
