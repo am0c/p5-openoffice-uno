@@ -558,10 +558,10 @@ SVToAny(SV *svp) {
 
 	case SVt_PVMG:
 		break;
-
+#if PERL_VERSION < 10
 	case SVt_PVBM:
 		break;
-
+#endif
 	case SVt_PVLV:
 		break;
 
