@@ -253,7 +253,11 @@ UNO_Interface::UNO_Interface(UNO_XAny thisif) {
     }
 
     args[0] <<= thisif;
-    tif = UNOInstance.ssf->createInstanceWithArguments(args);
+    try {
+        tif = UNOInstance.ssf->createInstanceWithArguments(args);
+    } catch ( ::com::sun::star::uno::Exception& e ) {
+	UNOCroak(aTHX_ e);
+    }        
     if ( ! tif.is() ) {
 	croak("UNO: Proxy creation failed");
     }
