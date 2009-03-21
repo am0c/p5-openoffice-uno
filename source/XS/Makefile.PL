@@ -65,6 +65,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 use File::Find;
 use File::Basename;
+use File::Path;
 use Config;
 use Cwd;
 
@@ -83,6 +84,7 @@ EOT
     exit 0;
 }
 
+$cwd = cwd();
 $sdk_dir = $ENV{'OO_SDK_HOME'};
 $cc = $ENV{'CXX'} || $Config{'cc'};
 $ld = $ENV{'CXX'} || $Config{'ld'};
@@ -90,6 +92,7 @@ $cc_flags = '';
 $uno_lib = $ENV{'OO_SDK_URE_LIB_DIR'};
 $uno_libpath = "-L$uno_lib";
 if( $^O eq 'MSWin32' ) {
+    $psep = '\\';
     $sdk_platf = 'windows';
     $uno_def   = '-DCPPU_ENV=msci -DWIN32 -DWNT';
     $uno_lib   = $sdk_dir . "\\windows\\lib";
@@ -97,14 +100,16 @@ if( $^O eq 'MSWin32' ) {
     $ld = 'link';
     $cc_flags = ' /TP /EHsc ';
 } else {
+    $psep = '/';
     @config = split '-', qx[$sdk_dir/config.guess];
     $cc = $ld = $ENV{'CXX'} || 'g++';
     if( $config[2] eq 'linux' ) {
         $sdk_platf = 'linux';
         $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DLINUX -DUNX';
-    } elsif( $config[2] eq 'darwin' ) {
+    } elsif( $config[2] =~ /^darwin/ ) {
         $sdk_platf = 'macosx';
         $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DMACOSX -DUNX';
+        $uno_libpath = "$uno_libpath -L$cwd/blib/uno/lib";
     } elsif( $config[2] eq 'solaris' ) {
         if( $config[0] eq 'sparc' ) {
             $sdk_platf = 'solsparc';
@@ -118,6 +123,10 @@ if( $^O eq 'MSWin32' ) {
         die "Please add a case for your sdk platform: ", join '-', @config;
     }
 }
+($sdk_bin_dir) = grep -d $_, "$sdk_dir$psep$sdk_platf${psep}bin",
+                             "$sdk_dir${psep}bin";
+($sdk_ure_lib) = grep -f "$_/types.rdb", "$ENV{'OO_SDK_URE_BIN_DIR'}",
+                                         "$ENV{'OO_SDK_URE_HOME'}/share/misc";
 
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
 @LPath = ($uno_lib);
@@ -173,7 +182,6 @@ exit(0);
 sub MY::makefile { '' }
 
 sub MY::postamble {
-    my $psep = $^O eq 'MSWin32' ? '\\' : '/';
     my $cwd = cwd();
     my $out = "blib${psep}uno";
     my $abs_out = File::Spec->rel2abs( $out );
@@ -194,7 +202,6 @@ sub MY::postamble {
          com.sun.star.uno.XWeak
          com.sun.star.lang.XComponent
          com.sun.star.bridge.XUnoUrlResolver
-         com.sun.star.frame.XComponentLoader
          com.sun.star.container.XHierarchicalNameAccess
          com.sun.star.uno.DeploymentException
          com.sun.star.registry.XSimpleRegistry
@@ -207,6 +214,9 @@ sub MY::postamble {
          com.sun.star.lang.WrappedTargetRuntimeException
          );
 
+# for OOo 2.x
+# com.sun.star.frame.XComponentLoader
+
     return <<EOT;
 #$out/some.urd : $out some.idl
 #	$sdk_dir/$sdk_platf/bin/idlc -I. -I$sdk_dir/idl -O$abs_out some.idl
@@ -215,7 +225,7 @@ sub MY::postamble {
 #	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
 
 $out/headers : $out
-	$sdk_dir$psep$sdk_platf${psep}bin${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$ENV{'OO_SDK_URE_BIN_DIR'}${psep}types.rdb"
+	$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$sdk_ure_lib${psep}types.rdb"
 	\$(TOUCH) $out/headers
 
 uno_stuff: $out/headers perluno
@@ -224,7 +234,7 @@ $out :
 	\$(MKPATH) $out
 
 perluno : perluno.tmpl
-	\$(PERL) -pe "s<UNO_PATH><$ENV{'OO_SDK_URE_LIB_DIR'}>" -- perluno.tmpl > perluno
+	\$(PERL) -pe "s<UNO_PATH><$sdk_ure_lib>" -- perluno.tmpl > perluno
 
 EOT
 }
@@ -245,9 +255,11 @@ sub getReqLib {
 sub getlib {
     return if defined($FLib{$clib});
     if ( ($File::Find::name =~ m/${clib}/) ) {
-	($libname, undef) = fileparse($File::Find::name);
+	($libname, $libdir) = fileparse($File::Find::name);
         if ( $^O eq 'MSWin32' ) {
             getlib_win32();
+        } elsif ( $^O eq 'darwin' ) {
+            getlib_osx();
         } else {
             getlib_unix();
         }
@@ -267,4 +279,16 @@ sub getlib_unix {
     $SLib{$clib} = $libname;
     $SLib{$clib} =~ s/^lib//;
     $SLib{$clib} =~ s/\.so$//;
+}
+
+sub getlib_osx {
+    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.dylib\.\d+$/);
+    $FLib{$clib} = $libname;
+    $SLib{$clib} = $libname;
+    $SLib{$clib} =~ s/^lib//;
+    $SLib{$clib} =~ s/\.dylib\.\d+$//;
+
+    # as insane as this seems, that's what OOo SDK does
+    mkpath("$cwd/blib/uno/lib");
+    symlink("$libdir$libname", "$cwd/blib/uno/lib/lib$SLib{$clib}.dylib");
 }
