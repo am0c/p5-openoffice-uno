@@ -15,7 +15,7 @@ sub get_cu {
     my ($pu) = @_;
 
     # can't make initialization with path work on Win32
-    if ($^O eq 'MSWin32') {
+    if ($^O eq 'MSWin32' || $ENV{URE_BOOTSTRAP}) {
         return $pu->createInitialComponentContext();
     } else {
         return $pu->createInitialComponentContext(get_file('perluno'));

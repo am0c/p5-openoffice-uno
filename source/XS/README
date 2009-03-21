@@ -20,6 +20,8 @@ DEPENDENCIES
    on port 8100:
 
    ooffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
+3) For OpenOffice.org 3.0, you need to set the environment variable
+   URE_BOOTSTRAP to file:///path/to/OpenOffice.org/.../fundamentalrc
 
 SITE
 
