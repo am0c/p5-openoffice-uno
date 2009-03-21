@@ -275,11 +275,11 @@ sub getlib_win32 {
 }
 
 sub getlib_unix {
-    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.so$/);
+    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.so(\.\d+)?$/);
     $FLib{$clib} = $libname;
     $SLib{$clib} = $libname;
     $SLib{$clib} =~ s/^lib//;
-    $SLib{$clib} =~ s/\.so$//;
+    $SLib{$clib} =~ s/\.so(\.\d+)?$//;
 
     # as insane as this seems, that's what OOo SDK does
     mkpath("$cwd/blib/uno/lib");
@@ -287,11 +287,11 @@ sub getlib_unix {
 }
 
 sub getlib_osx {
-    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.dylib\.\d+$/);
+    return unless ($libname =~ m/^lib/) && ($libname =~ m/\.dylib(\.\d+)?$/);
     $FLib{$clib} = $libname;
     $SLib{$clib} = $libname;
     $SLib{$clib} =~ s/^lib//;
-    $SLib{$clib} =~ s/\.dylib\.\d+$//;
+    $SLib{$clib} =~ s/\.dylib(\.\d+)?$//;
 
     # as insane as this seems, that's what OOo SDK does
     mkpath("$cwd/blib/uno/lib");
