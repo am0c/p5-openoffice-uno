@@ -1,7 +1,9 @@
 Revision history for Perl extension OpenOffice::UNO.
 
 0.06
+	- OpenOffice.org 3.0 compatibility.
 	- Perl 5.10 compatibility.
+	- Mac OS X compatibility.
 	- when method invocation gives an error, report to Perl the original
 	  exception, not the wrapper exception.
 
