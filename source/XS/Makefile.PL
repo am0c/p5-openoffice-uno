@@ -106,6 +106,7 @@ if( $^O eq 'MSWin32' ) {
     if( $config[2] eq 'linux' ) {
         $sdk_platf = 'linux';
         $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DLINUX -DUNX';
+        $uno_libpath = "$uno_libpath -L$cwd/blib/uno/lib";
     } elsif( $config[2] =~ /^darwin/ ) {
         $sdk_platf = 'macosx';
         $uno_def   = '-DCPPU_ENV=gcc3 -DGCC -DMACOSX -DUNX';
@@ -279,6 +280,10 @@ sub getlib_unix {
     $SLib{$clib} = $libname;
     $SLib{$clib} =~ s/^lib//;
     $SLib{$clib} =~ s/\.so$//;
+
+    # as insane as this seems, that's what OOo SDK does
+    mkpath("$cwd/blib/uno/lib");
+    symlink("$libdir$libname", "$cwd/blib/uno/lib/lib$SLib{$clib}.so");
 }
 
 sub getlib_osx {
