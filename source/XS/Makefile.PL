@@ -175,6 +175,11 @@ WriteMakefile (
     'VERSION_FROM'=> 'UNO.pm',
     'ABSTRACT_FROM'=> 'UNO.pm',
     'LICENSE'	=> 'open_source',
+    'META_MERGE' => { 'resources' =>
+                      { 'homepage' => 'http://perluno.sourceforge.net/',
+                        'repository' => 'https://sourceforge.net/scm/?type=hg&group_id=88004',
+                        },
+                      },
 );
 
 exit(0);
