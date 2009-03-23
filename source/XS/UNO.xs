@@ -59,6 +59,7 @@
  *
  ************************************************************************/
 
+#define PERL_NO_GET_CONTEXT
 #include "UNO.h"
 #include "ppport.h"
 
@@ -67,13 +68,18 @@
 // UNO Runtime Instance
 static PerlRT UNOInstance;
 
-// helper function
+// helper functions
 static void
-UNOCroak(pTHX_ ::com::sun::star::uno::Exception& e ) {
-    SV *exc = AnyToSV(makeAny(e));
+UNOCroak(pTHX_ UNO_XAny any ) {
+    SV *exc = AnyToSV(any);
     SV *errsv = get_sv("@", TRUE);
     sv_replace(errsv, exc);
-    croak(Nullch);
+    Perl_croak(aTHX_ Nullch);
+}
+
+static void
+UNOCroak(pTHX_ ::com::sun::star::uno::Exception& e ) {
+    UNOCroak(aTHX_ makeAny(e));
 }
 
 UNO::UNO() {
@@ -242,6 +248,7 @@ UNO_Interface::UNO_Interface() {
 }
 
 UNO_Interface::UNO_Interface(UNO_XAny thisif) {
+    dTHX;
     UNO_SAny args(1);
     UNO_XInterface tif;
 
@@ -273,6 +280,7 @@ UNO_Interface::UNO_Interface(UNO_XAny thisif) {
 
 SV *
 UNO_Interface::invoke(char *method, UNO_SAny args) {
+    dTHX;
     I32 i;
 
     ::rtl::OUString mstr = ::rtl::OUString::createFromAscii(method);
@@ -291,13 +299,9 @@ UNO_Interface::invoke(char *method, UNO_SAny args) {
     try {
 	ret_val = xinvoke->invoke(mstr, args, oidx, oargs);
     } catch ( ::com::sun::star::reflection::InvocationTargetException& e ) {
-	::com::sun::star::uno::Exception inner;
-	e.TargetException >>= inner;
-	UNOCroak(aTHX_ inner);
+	UNOCroak(aTHX_ e.TargetException);
     } catch ( ::com::sun::star::lang::WrappedTargetRuntimeException& e ) {
-	::com::sun::star::uno::Exception inner;
-	e.TargetException >>= inner;
-	UNOCroak(aTHX_ inner);       
+	UNOCroak(aTHX_ e.TargetException);
     } catch ( ::com::sun::star::uno::Exception& e ) {
 	UNOCroak(aTHX_ e);
     }
@@ -357,6 +361,7 @@ Bootstrap(pTHX) {
 
 UNO_SAny
 AVToSAny(AV *parr) {
+    dTHX;
     UNO_SAny aany;
 
     if ( av_len(parr) >= 0 ) {
@@ -370,6 +375,7 @@ AVToSAny(AV *parr) {
 
 UNO_XAny
 HVToStruct(HV *hv) {
+    dTHX;
     UNO_XAny a;
 
     SV *smagic = newSVpv(UNO_STRUCT_NAME_KEY, strlen(UNO_STRUCT_NAME_KEY));
@@ -402,6 +408,7 @@ HVToStruct(HV *hv) {
 
 UNO_XAny
 SVToAny(SV *svp) {
+    dTHX;
     UNO_XAny a;
 
     switch ( SvTYPE(svp) ) {
@@ -597,6 +604,7 @@ SVToAny(SV *svp) {
 
 AV *
 SAnyToAV(UNO_SAny sa) {
+    dTHX;
     AV *av;
 
     av = newAV();
@@ -610,6 +618,7 @@ SAnyToAV(UNO_SAny sa) {
 
 SV *
 AnyToSV(UNO_XAny a) {
+    dTHX;
     SV *ret;
 
     ret = Nullsv;
@@ -754,6 +763,7 @@ UNO_Boolean::UNO_Boolean() {
 }
 
 UNO_Boolean::UNO_Boolean(SV *bval) {
+    dTHX;
     sal_Bool b = (sal_Bool)SvTRUE(bval);
     pany = UNO_XAny(&b, getBooleanCppuType());
     bvalue = b;
@@ -769,6 +779,7 @@ UNO_Int32::UNO_Int32() {
 }
 
 UNO_Int32::UNO_Int32(SV *ival) {
+    dTHX;
     sal_Int32 i = (sal_Int32)SvIV(ival);
     pany = UNO_XAny(&i, getCppuType(&i));
     ivalue = i;
@@ -784,6 +795,7 @@ UNO_Int64::UNO_Int64() {
 }
 
 UNO_Int64::UNO_Int64(SV *ival) {
+    dTHX;
     sal_Int64 i = (sal_Int64)SvIV(ival);
     pany = UNO_XAny(&i, getCppuType(&i));
     ivalue = i;
