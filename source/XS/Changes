@@ -1,6 +1,6 @@
 Revision history for Perl extension OpenOffice::UNO.
 
-0.06
+0.06  Mon Mar 23 21:35:22 CET 2009
 	- OpenOffice.org 3.0 compatibility.
 	- Perl 5.10 compatibility.
 	- Mac OS X compatibility.
