@@ -424,7 +424,7 @@ SVToAny(SV *svp) {
 
 	case SVt_NV:
 	    if ( SvNOK(svp) ) {
-		a <<= SvNVX(svp);
+		a <<= (double) SvNVX(svp);
 	    }
 	    break;
 
