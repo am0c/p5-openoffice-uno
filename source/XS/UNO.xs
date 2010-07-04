@@ -411,192 +411,79 @@ SVToAny(SV *svp) {
     dTHX;
     UNO_XAny a;
 
-    switch ( SvTYPE(svp) ) {
-	case SVt_NULL:
-	    break;
+    SvGETMAGIC(svp);
 
-	case SVt_IV: {
-	    if ( SvIOK(svp) ) {
-		a <<= (long) SvIVX(svp);
+    if ( !SvOK(svp) )
+	return a;
+
+    if ( SvROK(svp) ) {
+	switch ( SvTYPE(SvRV(svp)) ) {
+	    case SVt_PVAV: {
+		AV *parr = (AV *)SvRV(svp);
+		UNO_SAny aany = AVToSAny(parr);
+		a <<= aany;
+
+		break;
 	    }
-	    break;
-	}
 
-	case SVt_NV:
-	    if ( SvNOK(svp) ) {
-		a <<= (double) SvNVX(svp);
+	    case SVt_PVHV: {
+		HV *hv = (HV *)SvRV(svp);
+		UNO_XAny aany = HVToStruct(hv);
+		a <<= aany;
+
+		break;
 	    }
-	    break;
 
-	case SVt_RV: {
-	    if (SvROK(svp)) {
-		switch ( SvTYPE(SvRV(svp)) ) {
-		     case SVt_PVAV: {
-			AV *parr = (AV *)SvRV(svp);
-			UNO_SAny aany = AVToSAny(parr);
-			a <<= aany;
+	    case SVt_RV:
+	    case SVt_PVMG: {
+		long otype;
+		IV tmp = SvIV((SV*)SvRV(svp));
+		UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
 
-			break;
-		    }
+		UNO_XAny tany = tptr->getAny();
 
-		    case SVt_RV: {
-			long otype;
-			IV tmp = SvIV((SV*)SvRV(svp));
-			UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
-
-			UNO_XAny tany = tptr->getAny();
-
-			switch (tany.getValueTypeClass()) {
-			    case typelib_TypeClass_STRUCT: {
-				UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
-				if( mh.is() ) {
-				    a = mh->getMaterial();
-				} else {
-				    croak("Error getting Material");
-				}
-				break;
-			    }
-
-			    case typelib_TypeClass_INTERFACE: {
-				a <<= tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_BOOLEAN: {
-				a = tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_LONG: {
-				a = tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_HYPER: {
-				a = tany;
-				break;
-			    }
-
-			    default: {
-				croak("Unsupported ref: %d", tany.getValueTypeClass());
-				break;
-			    }
-			}
-
-			break;
-		    }
-
-		    case SVt_PVMG: {
-			long otype;
-			IV tmp = SvIV((SV*)SvRV(svp));
-			UNO_Any *tptr = INT2PTR(UNO_Any *,tmp);
-
-			UNO_XAny tany = tptr->getAny();
-
-			switch (tany.getValueTypeClass()) {
-			    case typelib_TypeClass_STRUCT: {
-				UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
-				if( mh.is() ) {
-				    a = mh->getMaterial();
-				} else {
-				    croak("Error getting Material");
-				}
-				break;
-			    }
-
-			    case typelib_TypeClass_INTERFACE: {
-				a <<= tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_BOOLEAN: {
-				a = tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_LONG: {
-				a = tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_HYPER: {
-				a = tany;
-				break;
-			    }
-
-			    case typelib_TypeClass_SEQUENCE: {
-				a <<= tany;
-				break;
-			    }
-
-			    default: {
-				croak("Unsupported mg ref: %d", tany.getValueTypeClass());
-				break;
-			    }
+		switch (tany.getValueTypeClass()) {
+		    case typelib_TypeClass_STRUCT: {
+			UNO_XMaterialHolder mh(tptr->xinvoke, ::com::sun::star::uno::UNO_QUERY);
+			if( mh.is() ) {
+			    a = mh->getMaterial();
+			} else {
+			    croak("Error getting Material");
 			}
 			break;
 		    }
 
-		    case SVt_PVHV: {
-			HV *hv = (HV *)SvRV(svp);
-			UNO_XAny aany = HVToStruct(hv);
-			a <<= aany;
-
+		    case typelib_TypeClass_SEQUENCE:
+		    case typelib_TypeClass_INTERFACE: {
+			a <<= tany;
 			break;
 		    }
 
-		    default:
-			croak("SVToAny: Unsupported reference type: %d", SvTYPE(SvRV(svp)));
+		    case typelib_TypeClass_BOOLEAN:
+		    case typelib_TypeClass_LONG:
+		    case typelib_TypeClass_HYPER: {
+			a = tany;
 			break;
+		    }
+
+		    default: {
+			croak("Unsupported ref: %d", tany.getValueTypeClass());
+			break;
+		    }
 		}
+
+		break;
 	    }
-	    break;
 	}
-
-	case SVt_PV: {
-	    // Extract String
-	    char *tstr = SvPVX(svp);
-	    ::rtl::OUString ostr = ::rtl::OUString(tstr, SvCUR(svp), SvUTF8(svp) ? RTL_TEXTENCODING_UTF8 : RTL_TEXTENCODING_ISO_8859_1 );
-	    a <<= ostr;
-	    break;
-	}
-
-	case SVt_PVIV:
-		break;
-
-	case SVt_PVNV:
-		break;
-
-	case SVt_PVMG:
-		break;
-#if PERL_VERSION < 10
-	case SVt_PVBM:
-		break;
-#endif
-	case SVt_PVLV:
-		break;
-
-	case SVt_PVAV:
-		break;
-
-	case SVt_PVHV:
-		break;
-
-	case SVt_PVCV:
-		break;
-
-	case SVt_PVGV:
-		break;
-
-	case SVt_PVFM:
-		break;
-
-	case SVt_PVIO:
-		break;
-
-	default:
-	    croak("SVToAny: UNKNOWN Perl type");
-	    break;
+    } else if ( SvNOK(svp) ) {
+	a <<= (double) SvNVX(svp);
+    } else if (SvIOK(svp) ) {
+	a <<= (long) SvIVX(svp);
+    } else if (SvPOK(svp) ) {
+	// Extract String
+	char *tstr = SvPVX(svp);
+	::rtl::OUString ostr = ::rtl::OUString(tstr, SvCUR(svp), SvUTF8(svp) ? RTL_TEXTENCODING_UTF8 : RTL_TEXTENCODING_ISO_8859_1 );
+	a <<= ostr;
     }
 
     return a;
