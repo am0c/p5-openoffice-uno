@@ -1,5 +1,8 @@
 Revision history for Perl extension OpenOffice::UNO.
 
+0.07  Mon Jul  5 20:25:54 CEST 2010
+	- Released 0.06_01 without changes.
+
 0.06_01  Sun Jul  4 19:56:43 CEST 2010
 	- Build fixes for Perl 5.12 and for -Duselongdouble.
 

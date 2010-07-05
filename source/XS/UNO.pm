@@ -50,7 +50,7 @@ require Exporter; *import = \&Exporter::import;
 require DynaLoader;
 
 @ISA = qw(DynaLoader);
-$VERSION = '0.06_01';
+$VERSION = '0.07';
 @EXPORT = qw( createComponentContext );
 
 bootstrap OpenOffice::UNO;
