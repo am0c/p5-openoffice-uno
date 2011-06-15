@@ -1,33 +1,83 @@
-UNO version 0.05
-====================
+package OpenOffice::UNO;
 
-INSTALLATION
+=head1 NAME
 
-To install this module type the following:
+OpenOffice::UNO - interface to OpenOffice's UNO runtime
 
-   # use the correct path for setsdkenv_unix.sh
-   . /usr/lib/openoffice/sdk/setsdkenv_unix.sh
+=head1 SYNOPSIS
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+  # Launch OpenOffice.org as a server
+  $ ooffice \
+      "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
 
-DEPENDENCIES
+  use OpenOffice::UNO;
 
-1) OpenOffice.org (tested on v2.0 and v2.2)
-2) Tests > 07.t requires OpenOffice.org running as a server, listening
-   on port 8100:
+  # connect to the OpenOffice.org server
+  $uno = OpenOffice::UNO->new;
+  $cxt = $uno->createInitialComponentContext;
+  $sm  = $cxt->getServiceManager;
+  $resolver = $sm->createInstanceWithContext
+                  ("com.sun.star.bridge.UnoUrlResolver", $cxt);
+  $rsm = $resolver->resolve
+      ("uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager");
 
-   ooffice "-accept=socket,host=localhost,port=8100;urp;StarOffice.ServiceManager"
-3) For OpenOffice.org 3.0, you need to set the environment variable
-   URE_BOOTSTRAP to file:///path/to/OpenOffice.org/.../fundamentalrc
+  # get an instance of the Desktop service
+  $rc = $rsm->getPropertyValue("DefaultContext");
+  $desktop = $rsm->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-SITE
+  # create a name/value pair to be used in opening the document
+  $pv = $uno->createIdlStruct("com.sun.star.beans.PropertyValue");
+  $pv->Name("Hidden");
+  $pv->Value(OpenOffice::UNO::Boolean->new(0));
 
-http://perluno.sourceforge.net/
+  # open a document
+  $sdoc = $desktop->loadComponentFromURL("file:///home/jrandom/test1.sxw",
+                                         "_blank", 0, [$pv]);
 
-COPYRIGHT AND LICENCE
+  # close the document
+  $sdoc->dispose();
+
+=head1 DESCRIPTION
+
+This is a straight bridge to the OpenOffice.org API, so the definitve
+reference is in the OpenOffice.org SDK.
+
+The homepage for OpenOffice::UNO is http://perluno.sourceforge.net/
+
+=cut
+
+require Exporter; *import = \&Exporter::import;
+require DynaLoader;
+
+@ISA = qw(DynaLoader);
+$VERSION = '0.08';
+@EXPORT = qw( createComponentContext );
+
+bootstrap OpenOffice::UNO;
+
+package OpenOffice::UNO::Exception;
+
+@ISA = qw(OpenOffice::UNO::Struct);
+
+# warning about inherited AUTOLOAD for non-method 'Message'
+*AUTOLOAD = \&OpenOffice::UNO::Struct::AUTOLOAD;
+
+use overload
+    '""'     => \&Message,
+    ;
+
+=head1 AUTHOR
+
+Author: Bustamam Harun <bustamam@gmail.com>.
+
+Maintainer: Mattia Barbon <mbarbon@cpan.org>
+
+=head1 THIS IS FORKED PROJECT
+
+This library is NOT official CPAN module which is maintained by Hojung Youn <amorette@cpan.org>.
+This forked library is managed at <https://github.com/am0c/p5-openoffice-uno>.
+
+=head1 LICENSE
 
  *  The Contents of this file are made available subject to the terms of
  *  either of the following licenses
@@ -78,3 +128,7 @@ COPYRIGHT AND LICENCE
  *   All Rights Reserved.
  *
  *   Contributor(s): Bustamam Harun, Mattia Barbon
+
+=cut
+
+1;

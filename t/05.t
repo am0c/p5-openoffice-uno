@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
@@ -13,4 +13,10 @@ my $pu = new OpenOffice::UNO();
 my $cu = get_cu($pu);
 my $sm = $cu->getServiceManager();
 
-ok( 1, 'Got there' );
+eval {
+    $sm->testMethod();
+};
+if( my $e = $@ ) {
+    ok( 1, 'Got there' );
+}
+

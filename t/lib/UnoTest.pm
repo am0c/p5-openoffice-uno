@@ -9,7 +9,7 @@ our @EXPORT = qw(get_file get_cu get_service_manager);
 use OpenOffice::UNO;
 use Cwd;
 
-our $SMGR_URL = "uno:socket,host=localhost,port=8100;urp;StarOffice.ServiceManager";
+our $SMGR_URL = "uno:socket,host=127.0.0.1,port=8100;urp;StarOffice.ServiceManager";
 
 sub get_cu {
     my ($pu) = @_;

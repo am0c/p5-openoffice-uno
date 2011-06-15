@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
@@ -8,5 +8,7 @@ use Test::More tests => 1;
 use UnoTest;
 
 my ($pu, $smgr) = get_service_manager();
+
+my $rc = $smgr->getPropertyValue("DefaultContext");
 
 ok( 1, 'Got there' );

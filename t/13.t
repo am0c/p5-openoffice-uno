@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
@@ -13,11 +13,17 @@ my $rc = $smgr->getPropertyValue("DefaultContext");
 
 my $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-# open an existing writer doc
-my @args = ();
-my $doc = $dt->loadComponentFromURL(get_file("test1.sxw"), "_blank", 0, \@args);
+my $pv = $pu->createIdlStruct("com.sun.star.beans.PropertyValue");
+
+$pv->Name("Hidden");
+$pv->Value(1);
+
+my @args = ( $pv );
+
+# open an existing word doc, with PropertyValues
+my $sdoc = $dt->loadComponentFromURL(get_file("test1.sxw"), "_blank", 0, \@args);
 
 # Close doc
-$doc->dispose();
+$sdoc->dispose();
 
 ok( 1, 'Got there' );

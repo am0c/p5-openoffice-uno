@@ -128,6 +128,7 @@ if( $^O eq 'MSWin32' ) {
                              "$sdk_dir${psep}bin";
 ($sdk_ure_lib) = grep -f "$_/types.rdb", "$ENV{'OO_SDK_URE_BIN_DIR'}",
                                          "$ENV{'OO_SDK_URE_HOME'}/share/misc";
+$uno_version = $sdk_ure_lib eq "$ENV{'OO_SDK_URE_HOME'}/share/misc" ? "new" : "old";
 
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
 @LPath = ($uno_lib);
@@ -171,7 +172,9 @@ WriteMakefile (
 		     },
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
-			       'Mattia Barbon <mbarbon@cpan.org>' ),
+			       'Mattia Barbon <mbarbon@cpan.org>',
+                               'Hojung Youn <amorette@cpan.org>' ),
+    'BUILD_REQUIRES' => { "Text::Xslate" => "0.1010" },
     'VERSION_FROM'=> 'UNO.pm',
     'ABSTRACT_FROM'=> 'UNO.pm',
     'LICENSE'	=> 'open_source',
@@ -223,6 +226,13 @@ sub MY::postamble {
 # for OOo 2.x
 # com.sun.star.frame.XComponentLoader
 
+    @cppumaker_lines = qq{$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$sdk_ure_lib${psep}types.rdb"};
+    push @cppumaker_lines,
+        qq{$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $sdk_ure_lib${psep}types.rdb $ENV{OFFICE_BASE_PROGRAM_PATH}${psep}offapi.rdb}
+            if $uno_version eq 'new';
+
+    $cppumaker_lines = join "\t", map "$_\n", @cppumaker_lines;
+    
     return <<EOT;
 #$out/some.urd : $out some.idl
 #	$sdk_dir/$sdk_platf/bin/idlc -I. -I$sdk_dir/idl -O$abs_out some.idl
@@ -231,7 +241,7 @@ sub MY::postamble {
 #	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
 
 $out/headers : $out
-	$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$sdk_ure_lib${psep}types.rdb"
+	$cppumaker_lines
 	\$(TOUCH) $out/headers
 
 uno_stuff: $out/headers perluno
@@ -240,7 +250,7 @@ $out :
 	\$(MKPATH) $out
 
 perluno : perluno.tmpl
-	\$(PERL) -pe "s<UNO_PATH><$sdk_ure_lib>" -- perluno.tmpl > perluno
+	xslate perluno.tmpl -Duno_version=$uno_version > perluno
 
 EOT
 }

@@ -1,0 +1,10 @@
+[Bootstrap]
+:  given $uno_version {
+:   when "old" {
+UNO_TYPES=${OO_SDK_URE_BIN_DIR}/types.rdb
+:   }
+:   when "new" {
+UNO_TYPES=${OO_SDK_URE_HOME}/share/misc/types.rdb ${OFFICE_BASE_PROGRAM_PATH}/offapi.rdb
+UNO_SERVICES=${OO_SDK_URE_HOME}/share/misc/services.rdb
+:   }
+:  }

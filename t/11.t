@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl -w
 
 use strict;
 use warnings;
@@ -13,11 +13,11 @@ my $rc = $smgr->getPropertyValue("DefaultContext");
 
 my $dt = $smgr->createInstanceWithContext("com.sun.star.frame.Desktop", $rc);
 
-# create a blank calc document
+# open an existing writer doc
 my @args = ();
-my $sdoc = $dt->loadComponentFromURL("private:factory/scalc", "_blank", 0, \@args);
+my $doc = $dt->loadComponentFromURL(get_file("test1.sxw"), "_blank", 0, \@args);
 
 # Close doc
-$sdoc->dispose();
+$doc->dispose();
 
 ok( 1, 'Got there' );

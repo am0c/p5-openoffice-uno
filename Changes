@@ -1,4 +1,10 @@
 Revision history for Perl extension OpenOffice::UNO.
+THIS IS FORKED PROJECT (NOT OFFICIAL OpenOffice::UNO CPAN MODULE)
+
+0.08  Thu Jun 16 02:29:10 KST 2011
+	- THIS IS FORKED PROJECT (NOT OFFICIAL OpenOffice::UNO CPAN MODULE)
+	- fix OpenOffice.org 3.0 compatiblity.
+        - fix the project structure from hg to git
 
 0.07  Mon Jul  5 20:25:54 CEST 2010
 	- Released 0.06_01 without changes.
