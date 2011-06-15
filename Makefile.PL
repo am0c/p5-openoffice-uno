@@ -128,6 +128,7 @@ if( $^O eq 'MSWin32' ) {
                              "$sdk_dir${psep}bin";
 ($sdk_ure_lib) = grep -f "$_/types.rdb", "$ENV{'OO_SDK_URE_BIN_DIR'}",
                                          "$ENV{'OO_SDK_URE_HOME'}/share/misc";
+$uno_version = $sdk_ure_lib eq "$ENV{'OO_SDK_URE_HOME'}/share/misc" ? "new" : "old";
 
 @ReqLibs = ("cppuhelper", "cppu", "salhelper", "sal", "stlport", "gcc_s");
 @LPath = ($uno_lib);
@@ -172,6 +173,7 @@ WriteMakefile (
     'XSOPT'	=> '-C++',
     'AUTHOR'	=> join( ', ', 'Bustamam Harun <bustamam@gmail.com>',
 			       'Mattia Barbon <mbarbon@cpan.org>' ),
+    'BUILD_REQUIRES' => { "Text::Xslate" => "0.1010" },
     'VERSION_FROM'=> 'UNO.pm',
     'ABSTRACT_FROM'=> 'UNO.pm',
     'LICENSE'	=> 'open_source',
@@ -240,7 +242,7 @@ $out :
 	\$(MKPATH) $out
 
 perluno : perluno.tmpl
-	\$(PERL) -pe "s<UNO_PATH><$sdk_ure_lib>" -- perluno.tmpl > perluno
+	xslate perluno.tmpl -Duno_version=$uno_version > perluno
 
 EOT
 }
