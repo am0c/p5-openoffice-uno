@@ -1,8 +1,7 @@
-syntax: glob
-source/XS/blib
-source/XS/Makefile
-source/XS/UNO.bs
-source/XS/UNO.c
-source/XS/UNO.o
-source/XS/perluno
-source/XS/pm_to_blib
+blib
+Makefile
+UNO.bs
+UNO.c
+UNO.o
+perluno
+pm_to_blib
