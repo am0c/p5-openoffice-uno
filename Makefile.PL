@@ -225,6 +225,13 @@ sub MY::postamble {
 # for OOo 2.x
 # com.sun.star.frame.XComponentLoader
 
+    @cppumaker_lines = qq{$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$sdk_ure_lib${psep}types.rdb"};
+    push @cppumaker_lines,
+        qq{$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $sdk_ure_lib${psep}types.rdb $ENV{OFFICE_BASE_PROGRAM_PATH}${psep}offapi.rdb}
+            if $uno_version eq 'new';
+
+    $cppumaker_lines = join "\t", map "$_\n", @cppumaker_lines;
+    
     return <<EOT;
 #$out/some.urd : $out some.idl
 #	$sdk_dir/$sdk_platf/bin/idlc -I. -I$sdk_dir/idl -O$abs_out some.idl
@@ -233,7 +240,7 @@ sub MY::postamble {
 #	$sdk_dir/$sdk_platf/bin/regmerge $out/moo.uno.rdb /UCR $out/some.urd
 
 $out/headers : $out
-	$sdk_bin_dir${psep}cppumaker -Gc -BUCR -O$abs_out $interfaces "$sdk_ure_lib${psep}types.rdb"
+	$cppumaker_lines
 	\$(TOUCH) $out/headers
 
 uno_stuff: $out/headers perluno
