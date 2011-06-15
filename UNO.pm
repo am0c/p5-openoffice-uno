@@ -50,7 +50,7 @@ require Exporter; *import = \&Exporter::import;
 require DynaLoader;
 
 @ISA = qw(DynaLoader);
-$VERSION = '0.07';
+$VERSION = '0.08';
 @EXPORT = qw( createComponentContext );
 
 bootstrap OpenOffice::UNO;
@@ -71,6 +71,11 @@ use overload
 Author: Bustamam Harun <bustamam@gmail.com>.
 
 Maintainer: Mattia Barbon <mbarbon@cpan.org>
+
+=head1 THIS IS FORKED PROJECT
+
+This library is NOT official CPAN module which is maintained by Hojung Youn <amorette@cpan.org>.
+This forked library is managed at <https://github.com/am0c/p5-openoffice-uno>.
 
 =head1 LICENSE
 
