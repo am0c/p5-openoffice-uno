@@ -1,5 +1,10 @@
-UNO version 0.05
+UNO version 0.08
 ====================
+
+THIS IS *NOT* OFFICIAL CPAN LIBRARY
+
+This Library is forked project from http://perluno.sourceforge.net/,
+which is maintained at http://https://github.com/am0c/p5-openoffice-uno
 
 INSTALLATION
 
@@ -23,9 +28,13 @@ DEPENDENCIES
 3) For OpenOffice.org 3.0, you need to set the environment variable
    URE_BOOTSTRAP to file:///path/to/OpenOffice.org/.../fundamentalrc
 
-SITE
+ORIGINAL SITE
 
 http://perluno.sourceforge.net/
+
+THIS LIBRARY IS FORKED PROJECT
+
+http://https://github.com/am0c/p5-openoffice-uno
 
 COPYRIGHT AND LICENCE
 
